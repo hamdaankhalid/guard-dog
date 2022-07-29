@@ -11,6 +11,9 @@ import { HomeComponent } from './home/home/home.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { ApiInterceptor } from './interceptors/api.interceptor';
+import { StreamerComponent } from './home/streamer/streamer.component';
+import { ViewLiveStreamComponent } from './home/view-live-stream/view-live-stream.component';
+import { LandingPageComponent } from './public/landing-page/landing-page.component';
 
 @NgModule({
   declarations: [
@@ -19,7 +22,10 @@ import { ApiInterceptor } from './interceptors/api.interceptor';
     SignupComponent,
     NavbarComponent,
     FooterComponent,
-    HomeComponent
+    HomeComponent,
+    StreamerComponent,
+    ViewLiveStreamComponent,
+    LandingPageComponent
   ],
   imports: [
     BrowserModule,

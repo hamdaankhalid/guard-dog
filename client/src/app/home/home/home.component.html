@@ -1,1 +1,17 @@
-<p>Home works!</p>
+<a class="nav-item nav-link" routerLink="/streamer" > Stream from device </a>
+
+<a class="nav-item nav-link" routerLink="/view-live-stream" > View live stream </a>
+
+
+<div *ngIf="recordings.length > 0; else elseBlock">
+  <div>Previous Recordings!</div>
+  
+  <div *ngFor="let recording of recordings">
+    recorded recording
+  </div>
+
+</div>
+
+<ng-template #elseBlock>
+  You have no recordings at the moment!
+</ng-template>
