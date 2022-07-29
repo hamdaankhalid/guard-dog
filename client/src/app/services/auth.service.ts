@@ -14,7 +14,7 @@ export class AuthService {
 
   constructor(private httpClient: HttpClient) {
     const userFromLocal = localStorage.getItem('currentUser') == null ? null : JSON.parse(localStorage.getItem('currentUser') || '{}');
-    this.currentUserSubject = new BehaviorSubject<any>(userFromLocal);
+    this.currentUserSubject = new BehaviorSubject<any>({"foo": "fuck"});
     this.currentUser = this.currentUserSubject.asObservable();
    }
 

@@ -14,6 +14,7 @@ import { ApiInterceptor } from './interceptors/api.interceptor';
 import { StreamerComponent } from './home/streamer/streamer.component';
 import { ViewLiveStreamComponent } from './home/view-live-stream/view-live-stream.component';
 import { LandingPageComponent } from './public/landing-page/landing-page.component';
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 
 @NgModule({
   declarations: [
@@ -32,7 +33,8 @@ import { LandingPageComponent } from './public/landing-page/landing-page.compone
     FormsModule,
     ReactiveFormsModule,
     AppRoutingModule,
-    HttpClientModule
+    HttpClientModule,
+    NgbModule
   ],
   providers: [
     {

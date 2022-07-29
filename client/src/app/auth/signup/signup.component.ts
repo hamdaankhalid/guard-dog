@@ -18,14 +18,15 @@ export class SignupComponent implements OnInit {
     private formBuilder: UntypedFormBuilder,
     private router: Router,
     private authService: AuthService
-  ) {
-    // redirect to home if already logged in
-    // if (this.authService.currentUser) {
-    //   this.router.navigate(['/']);
-    // }
-   }
+  ) {}
 
   ngOnInit(): void {
+    this.authService.currentUser.subscribe((val: any) => {
+      if (val) {
+        this.router.navigate(['/home']);
+      }
+    });
+
     this.signupForm = this.formBuilder.group({
       email: ['', Validators.required],
       password: ['', [Validators.required, Validators.minLength(6)]],
@@ -46,15 +47,19 @@ export class SignupComponent implements OnInit {
     // make a post request if we succeed forward to login page
     console.log(this.signupForm.value);
 
-    this.authService.signup(this.signupForm.value.email, this.signupForm.value.password).subscribe((_) => {
-      this.loading = false;
-      this.router.navigate(['/']);
-      return;
-    }, (_) => {
-      this.loading = false;
-      return;
-    })
-    // otherwise show error
+    this.authService.signup(this.signupForm.value.email, this.signupForm.value.password).subscribe((response: any) => {
+      if (response.status === 200) {
+        this.loading = false;
+        this.router.navigate(['/login']);
+      } else {
+        // show error
+        this.loading = false;
+      }
+    }, (_: any) => {
+        // show error
+        this.loading = false;
+        return;
+    });
   }
 
 }
