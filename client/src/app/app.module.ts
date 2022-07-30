@@ -15,6 +15,7 @@ import { StreamerComponent } from './home/streamer/streamer.component';
 import { ViewLiveStreamComponent } from './home/view-live-stream/view-live-stream.component';
 import { LandingPageComponent } from './public/landing-page/landing-page.component';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { WebcamModule } from 'ngx-webcam';
 
 @NgModule({
   declarations: [
@@ -34,7 +35,8 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
     ReactiveFormsModule,
     AppRoutingModule,
     HttpClientModule,
-    NgbModule
+    NgbModule,
+    WebcamModule
   ],
   providers: [
     {
