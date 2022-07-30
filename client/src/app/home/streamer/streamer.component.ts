@@ -55,7 +55,7 @@ private sendOutputIntervalId: any;
   }
 
   public handleImage(webcamImage: WebcamImage): void {
-    console.info('received webcam image', webcamImage);
+    console.info('stream image', webcamImage);
   }
 
   public handleInitError(error: WebcamInitError): void {
