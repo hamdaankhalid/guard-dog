@@ -1,19 +1,25 @@
 <div>
+  Time:
+  <br>
+  {{ timer }}
+</div>
+
+<div>
   Record
 </div>
 
 <div>
 
   <video #myVideo autoplay playsinline style="width: 50vw; height: 50vh;"></video>
-  
+
   <!-- <video #recordedVideo autoplay playsinline style="width: 50vw; height: 50vh;"></video> -->
   <br/>
-  
+
   <button class="actionBtn" (click)="toggleWebcam();">
     <span *ngIf="!showWebcam"> Record </span>
     <span *ngIf="showWebcam"> Stop </span>
   </button>
-  
+
   <br/>
 
 </div>

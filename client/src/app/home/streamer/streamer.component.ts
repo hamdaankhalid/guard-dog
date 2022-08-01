@@ -14,6 +14,7 @@ export class StreamerComponent implements OnInit {
   // toggle webcam on/off
   public showWebcam = false;
   public errors: WebcamInitError[] = [];
+  public timer: Date = new Date();
   
   // private chunks: any[] = [];
 
@@ -30,7 +31,9 @@ export class StreamerComponent implements OnInit {
   constructor(private clientServerStreamService: ClientServerStreamService) {}
 
   ngOnInit(): void {
-
+    setInterval(() => {
+      this.timer = new Date();
+    }, 1000);
   }
 
   public toggleWebcam(): void {
