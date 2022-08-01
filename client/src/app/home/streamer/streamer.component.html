@@ -3,17 +3,10 @@
 </div>
 
 <div>
-  <webcam [height]="500" [width]="500" *ngIf="showWebcam"
-          [allowCameraSwitch]="allowCameraSwitch" [switchCamera]="nextWebcamObservable"
-          [videoOptions]="videoOptions"
-          [imageQuality]="1"
-          (cameraSwitched)="cameraWasSwitched($event)"
-          (initError)="handleInitError($event)"
 
-          [trigger]="triggerObservable" 
-          (imageCapture)="handleImage($event)"
-  ></webcam>
+  <video #myVideo autoplay playsinline style="width: 50vw; height: 50vh;"></video>
   
+  <!-- <video #recordedVideo autoplay playsinline style="width: 50vw; height: 50vh;"></video> -->
   <br/>
   
   <button class="actionBtn" (click)="toggleWebcam();">
@@ -22,13 +15,7 @@
   </button>
   
   <br/>
-  
-  <button class="actionBtn" (click)="showNextWebcam(true);" [disabled]="!multipleWebcamsAvailable">Next Webcam</button>
-  <input id="cameraSwitchCheckbox" type="checkbox" [(ngModel)]="allowCameraSwitch"><label for="cameraSwitchCheckbox">Allow Camera Switch</label>
-  
-  <br/>
 
-  <button (click)="showNextWebcam(deviceId);">Activate</button>
 </div>
 
 <h4 *ngIf="errors.length > 0">Messages:</h4>

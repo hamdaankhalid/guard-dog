@@ -1,81 +1,74 @@
-import { Component, OnInit } from '@angular/core';
-import { WebcamImage, WebcamInitError, WebcamUtil } from 'ngx-webcam';
-import { Subject, Observable } from 'rxjs';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { WebcamImage, WebcamInitError } from 'ngx-webcam';
+import { ClientServerStreamService } from 'src/app/services/client-server-stream.service';
+
+declare var MediaRecorder: any;
+
 
 @Component({
   selector: 'app-streamer',
   templateUrl: './streamer.component.html',
-  styleUrls: ['./streamer.component.scss']
+  styleUrls: ['./streamer.component.scss'],
 })
 export class StreamerComponent implements OnInit {
-// toggle webcam on/off
-public showWebcam = false;
-public allowCameraSwitch = true;
-public multipleWebcamsAvailable = false;
-public deviceId: any;
-public videoOptions: MediaTrackConstraints = {
-  // width: {ideal: 1024},
-  // height: {ideal: 576}
-};
-public errors: WebcamInitError[] = [];
+  // toggle webcam on/off
+  public showWebcam = false;
+  public errors: WebcamInitError[] = [];
+  
+  // private chunks: any[] = [];
 
-private trigger: Subject<void> = new Subject<void>();
+  private stream: MediaStream | null = null;
 
-// switch to next / previous / specific webcam; true/false: forward/backwards, string: deviceId
-private nextWebcam: Subject<boolean|string> = new Subject<boolean|string>();
+  private mediaRecorder: any = null;
 
-private sendOutputIntervalId: any;
+  @ViewChild('myVideo', { read: ElementRef })
+  myVideo!: ElementRef<HTMLVideoElement>;
 
-  constructor() { }
+  // @ViewChild('recordedVideo', { read: ElementRef })
+  // recordedVideo!: ElementRef<HTMLVideoElement>;
+
+  constructor(private clientServerStreamService: ClientServerStreamService) {}
 
   ngOnInit(): void {
-    WebcamUtil.getAvailableVideoInputs()
-      .then((mediaDevices: MediaDeviceInfo[]) => {
-        this.multipleWebcamsAvailable = mediaDevices && mediaDevices.length > 1;
-      });
-  }
 
-  public get triggerObservable(): Observable<void> {
-    return this.trigger.asObservable();
   }
 
   public toggleWebcam(): void {
     this.showWebcam = !this.showWebcam;
     if (this.showWebcam) {
-      
-        this.sendOutputIntervalId = setInterval(() => {
-          this.trigger.next();
-        }, 1000);
-      
+      console.log('Record');
+
+      navigator.mediaDevices.getUserMedia({ audio: true, video: true }).then((stream) => {
+        
+        this.stream = stream;
+        this.myVideo.nativeElement.srcObject = stream;
+
+        this.mediaRecorder = new MediaRecorder(stream) as any;
+        
+        this.mediaRecorder.ondataavailable = async (e: any) => {
+          const blobText = await (new Blob([e.data])).text();
+          this.clientServerStreamService.sendUpstream(blobText);
+          // this.chunks.push(e.data);
+        };
+
+        this.mediaRecorder.start(1000); 
+
+      }).catch((err) => {
+        this.errors.push(err);
+      });
+
     } else {
-      console.log("Stop recording!");
-      clearInterval(this.sendOutputIntervalId);
-      this.sendOutputIntervalId = null;
+      console.log('Stop');
+
+      this.mediaRecorder.stop();
+
+      if (this.stream) {
+        this.stream.getTracks().forEach(track => track.stop());
+      }
+
+      this.myVideo.nativeElement.srcObject = null;
+
+      // this.recordedVideo.nativeElement.src = window.URL.createObjectURL(new Blob(this.chunks));
     }
   }
-
-  public handleImage(webcamImage: WebcamImage): void {
-    console.info('stream image', webcamImage);
-  }
-
-  public handleInitError(error: WebcamInitError): void {
-    this.errors.push(error);
-  }
-
-  public showNextWebcam(directionOrDeviceId: boolean|string): void {
-    // true => move forward through devices
-    // false => move backwards through devices
-    // string => move to device with given deviceId
-    this.nextWebcam.next(directionOrDeviceId);
-  }
-
-  public cameraWasSwitched(deviceId: string): void {
-    console.log('active device: ' + deviceId);
-    this.deviceId = deviceId;
-  }
-
-  public get nextWebcamObservable(): Observable<boolean|string> {
-    return this.nextWebcam.asObservable();
-  }
-
 }
