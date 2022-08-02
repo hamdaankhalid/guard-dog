@@ -1,6 +1,5 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
-import { WebcamImage, WebcamInitError } from 'ngx-webcam';
-import { ClientServerStreamService } from 'src/app/services/client-server-stream.service';
+import { WebcamInitError } from 'ngx-webcam';
 
 declare var MediaRecorder: any;
 
@@ -18,6 +17,7 @@ export class StreamerComponent implements OnInit {
   public errors: WebcamInitError[] = [];
   public timer: Date = new Date();
 
+  private rounds = 0;
   private chunks: any[] = [];
   private stream: MediaStream | null = null;
   private mediaRecorder: any = null;
@@ -28,7 +28,7 @@ export class StreamerComponent implements OnInit {
   // @ViewChild('recordedVideo', { read: ElementRef })
   // recordedVideo!: ElementRef<HTMLVideoElement>;
 
-  constructor(private clientServerStreamService: ClientServerStreamService) {}
+  constructor() {}
 
   ngOnInit(): void {
     // shows the datetime on recorder screen
@@ -52,10 +52,11 @@ export class StreamerComponent implements OnInit {
             this.chunks.push(e.data);
             if (this.chunks.length === this.ONE_MINUTE_BY_RATE_OF_RECORDING) {
               // transform and send remaining data to server
-              
+              this.transformAndUpload(this.chunks, `video_${this.rounds}`);
+              // refresh chunks to be empty
+              this.chunks = [];
+              this.rounds++;
             }
-            // refresh chunks to be empty
-            this.chunks = [];
           };
           this.mediaRecorder.start(this.RATE_OF_RECORDING);
         })
@@ -70,17 +71,15 @@ export class StreamerComponent implements OnInit {
       this.myVideo.nativeElement.srcObject = null;
       if (this.chunks.length > 0) {
         // transform and send remaining data to server
+        this.transformAndUpload(this.chunks, "video_end");
       }
       this.chunks = [];
       // this.recordedVideo.nativeElement.src = window.URL.createObjectURL(new Blob(this.chunks));
     }
   }
 
-  private transformChunksToFile() {
-
-  }
-
-  private uploadFileToServer() {
-    // get metatadata e.g. the duration and all that jazz
+  private transformAndUpload(chunks: any[], filename: string) {
+    const file = new File([new Blob(chunks)], filename);
+    console.log(file);
   }
 }
