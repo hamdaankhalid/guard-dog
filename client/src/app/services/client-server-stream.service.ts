@@ -13,8 +13,8 @@ export class ClientServerStreamService {
   constructor() { }
 
   
-  connect(): Observable<any> {
-}
+  connect() {
+  }
 
   sendUpstream(data: string) {
     if (this.connection$) {
