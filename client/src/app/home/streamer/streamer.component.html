@@ -17,7 +17,7 @@
 
   <div>
     <label>Enter a name that this device can be associated with for this recording session:</label>
-    <input type="text" />
+    <input #deviceName type="text" [attr.disabled]="isNameDisabled ? '': null"/>
   </div>
   
   <button class="actionBtn" (click)="toggleWebcam();">
