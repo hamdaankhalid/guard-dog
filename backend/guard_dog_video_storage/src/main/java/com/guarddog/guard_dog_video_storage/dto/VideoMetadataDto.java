@@ -11,14 +11,14 @@ import java.util.Date;
 @NoArgsConstructor
 @Setter
 @Getter
-public class VideoMetadata {
+public class VideoMetadataDto {
     private String name;
     private int part;
     private String deviceName;
     private int durationInSeconds;
-    private Date session;
+    private Date sessionStart;
 
     public String toString() {
-        return "{" + name + ", "+ part + ", " + deviceName + ", " + durationInSeconds + ", " + session + "}";
+        return "{" + name + ", "+ part + ", " + deviceName + ", " + durationInSeconds + ", " + sessionStart + "}";
     };
 }

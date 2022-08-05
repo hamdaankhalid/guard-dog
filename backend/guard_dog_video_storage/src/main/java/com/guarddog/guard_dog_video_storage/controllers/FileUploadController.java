@@ -1,7 +1,10 @@
 package com.guarddog.guard_dog_video_storage.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.guarddog.guard_dog_video_storage.dto.VideoMetadata;
+import com.guarddog.guard_dog_video_storage.dto.VideoMetadataDto;
+import com.guarddog.guard_dog_video_storage.services.CloudStoreService;
+import com.guarddog.guard_dog_video_storage.services.MetadataService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -14,19 +17,20 @@ import java.io.IOException;
 
 @RestController
 public class FileUploadController {
+    @Autowired
+    private CloudStoreService cloudStoreService;
+
+    @Autowired
+    private MetadataService metadataService;
 
     @PostMapping(path = "/miniupload", consumes = { "multipart/form-data" })
     public ResponseEntity uploadFile(
             @RequestParam("base64file") MultipartFile file,
             @RequestParam("metadata") String metadata
     ) throws IOException {
-        // Write metadata to DB
-        VideoMetadata videoMetadata = new ObjectMapper().readValue(metadata, VideoMetadata.class);
-        
-        // Write file locally for now
-        String filePath = "/Users/hamdaankhalid/Desktop/guard-dog/backend/guard_dog_video_storage/src/main/temp";
-        File dest = new File(filePath+"/"+videoMetadata.getName());
-        file.transferTo(dest);
+        VideoMetadataDto videoMetadata = new ObjectMapper().readValue(metadata, VideoMetadataDto.class);
+        cloudStoreService.uploadBlob(file, videoMetadata.getName());
+        metadataService.upload(videoMetadata);
 
         return ResponseEntity.ok().build();
     }

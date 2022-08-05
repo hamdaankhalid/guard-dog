@@ -11,8 +11,6 @@ const NO_DEVICE_NAME_ERROR = 'Enter a device name to begin recording!';
   templateUrl: './streamer.component.html',
 })
 export class StreamerComponent implements OnInit {
-  private readonly DURATION_WRT_RATE_OF_RECORDING = 7; // 1 minute
-  private readonly RATE_OF_TRIGGER = 1000;
 
   // toggle webcam on/off
   public showWebcam = false;
@@ -22,7 +20,6 @@ export class StreamerComponent implements OnInit {
 
   private rounds = 0;
   private stream: MediaStream | null = null;
-  private mediaRecorder: any = null;
   private mediaRecorderInterval: any;
 
   private session: Date | undefined | null;
@@ -40,6 +37,7 @@ export class StreamerComponent implements OnInit {
   }
 
   public toggleWebcam(): void {
+    
     this.showWebcam = !this.showWebcam;
     if (this.showWebcam) {
       if (!this.deviceName.nativeElement.value || this.deviceName.nativeElement.value.includes(" ")) {
@@ -92,7 +90,11 @@ export class StreamerComponent implements OnInit {
         this.stream.getTracks().forEach((track) => track.stop());
       }
       this.session = null;
-      this.rounds = 0;
+
+      // this is so the clearInterval has time to run the last one without a messed up rounds param
+      setTimeout(() => {
+        this.rounds = 0;
+      }, 2_000);
     }
   }
 
