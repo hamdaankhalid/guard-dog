@@ -9,7 +9,6 @@ const NO_DEVICE_NAME_ERROR = 'Enter a device name to begin recording!';
 @Component({
   selector: 'app-streamer',
   templateUrl: './streamer.component.html',
-  styleUrls: ['./streamer.component.scss'],
 })
 export class StreamerComponent implements OnInit {
   private readonly DURATION_WRT_RATE_OF_RECORDING = 7; // 1 minute

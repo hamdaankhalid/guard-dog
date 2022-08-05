@@ -22,15 +22,11 @@ public class FileUploadController {
     ) throws IOException {
         // Write metadata to DB
         VideoMetadata videoMetadata = new ObjectMapper().readValue(metadata, VideoMetadata.class);
-
-        // Stream temp file to the right directory
         
         // Write file locally for now
         String filePath = "/Users/hamdaankhalid/Desktop/guard-dog/backend/guard_dog_video_storage/src/main/temp";
         File dest = new File(filePath+"/"+videoMetadata.getName());
         file.transferTo(dest);
-
-        System.out.println(file);
 
         return ResponseEntity.ok().build();
     }

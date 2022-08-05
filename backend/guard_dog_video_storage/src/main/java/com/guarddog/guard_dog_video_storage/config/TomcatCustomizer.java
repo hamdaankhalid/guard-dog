@@ -8,8 +8,7 @@ import org.springframework.boot.web.server.WebServerFactoryCustomizer;
 import org.springframework.stereotype.Component;
 
 @Component
-public class TomcatCustomizer implements
-        WebServerFactoryCustomizer<TomcatServletWebServerFactory> {
+public class TomcatCustomizer implements WebServerFactoryCustomizer<TomcatServletWebServerFactory> {
 
     public void customize(TomcatServletWebServerFactory factory) {
 
