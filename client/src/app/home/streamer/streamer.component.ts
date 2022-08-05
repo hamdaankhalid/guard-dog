@@ -4,7 +4,7 @@ import { VideoStorageService } from 'src/app/services/video-storage.service';
 
 declare var MediaRecorder: any;
 
-const NO_DEVICE_NAME_ERROR = "Enter a device name to begin recording!";
+const NO_DEVICE_NAME_ERROR = 'Enter a device name to begin recording!';
 
 @Component({
   selector: 'app-streamer',
@@ -12,8 +12,8 @@ const NO_DEVICE_NAME_ERROR = "Enter a device name to begin recording!";
   styleUrls: ['./streamer.component.scss'],
 })
 export class StreamerComponent implements OnInit {
-  private readonly ONE_MINUTE_BY_RATE_OF_RECORDING = 30;
-  private readonly RATE_OF_RECORDING = 2000;
+  private readonly DURATION_WRT_RATE_OF_RECORDING = 7; // 1 minute
+  private readonly RATE_OF_TRIGGER = 1000;
 
   // toggle webcam on/off
   public showWebcam = false;
@@ -22,11 +22,11 @@ export class StreamerComponent implements OnInit {
   public isNameDisabled: boolean = false;
 
   private rounds = 0;
-  private chunks: any[] = [];
   private stream: MediaStream | null = null;
   private mediaRecorder: any = null;
+  private mediaRecorderInterval: any;
 
-  private session: Date | undefined | null;;
+  private session: Date | undefined | null;
 
   @ViewChild('myVideo', { read: ElementRef })
   myVideo!: ElementRef<HTMLVideoElement>;
@@ -34,13 +34,10 @@ export class StreamerComponent implements OnInit {
   @ViewChild('deviceName', { read: ElementRef })
   deviceName!: ElementRef<HTMLInputElement>;
 
-  // @ViewChild('recordedVideo', { read: ElementRef })
-  // recordedVideo!: ElementRef<HTMLVideoElement>;
-
   constructor(private videoStorageService: VideoStorageService) {}
 
   ngOnInit(): void {
-    setInterval(() => this.timer = new Date(), 1000);
+    setInterval(() => (this.timer = new Date()), 1000);
   }
 
   public toggleWebcam(): void {
@@ -63,17 +60,24 @@ export class StreamerComponent implements OnInit {
         .then((stream) => {
           this.stream = stream;
           this.myVideo.nativeElement.srcObject = stream;
-          this.mediaRecorder = new MediaRecorder(stream) as any;
-          this.mediaRecorder.ondataavailable = async (e: any) => {
-            this.chunks.push(e.data);
-            if (this.chunks.length === this.ONE_MINUTE_BY_RATE_OF_RECORDING) {
-              this.transformAndUpload(this.rounds, this.chunks, `${this.deviceName.nativeElement.value}_video_${this.rounds}`, this.session!);
-              this.chunks = [];
+
+          this.mediaRecorderInterval = setInterval(() => {
+            const chunks: any[] = [];
+            const mediaRecorder = new MediaRecorder(stream) as any;
+            mediaRecorder.ondataavailable = async (e: any) => chunks.push(e.data);
+            mediaRecorder.onstop = async (e: any) => {
+              const deviceName = this.deviceName.nativeElement.value;
+              await this.transformAndUpload(this.rounds, chunks, `${deviceName}_video_${this.rounds}`, this.session!);
               this.rounds++;
             }
-          };
-          // the rate of recording decides the time we have to upload the data before the next batch comes in
-          this.mediaRecorder.start(this.RATE_OF_RECORDING);
+            setTimeout(() => {
+              if (mediaRecorder.state !== "inactive") {
+                mediaRecorder.stop()
+              }
+            }, 60_000);
+            mediaRecorder.start();
+          }, 60_000);
+ 
         })
         .catch((err) => {
           this.errors.push(err);
@@ -81,31 +85,36 @@ export class StreamerComponent implements OnInit {
       this.session = new Date();
     } else {
       this.isNameDisabled = false;
-      this.mediaRecorder.stop();
+      
+      clearInterval(this.mediaRecorderInterval);
+      this.myVideo.nativeElement.srcObject = null;
+
       if (this.stream) {
         this.stream.getTracks().forEach((track) => track.stop());
       }
-      this.myVideo.nativeElement.srcObject = null;
-      if (this.chunks.length > 0) {
-        this.transformAndUpload(-1, this.chunks, `${this.deviceName.nativeElement.value}_video_video_end`, this.session!);
-      }
-      this.chunks = [];
-      // this.recordedVideo.nativeElement.src = window.URL.createObjectURL(new Blob(this.chunks));
       this.session = null;
       this.rounds = 0;
     }
   }
 
-  private transformAndUpload(round: number, chunks: any[], filename: string, session: Date) {
-    const file = new File([new Blob(chunks)], filename);
+
+
+  private async transformAndUpload(
+    round: number,
+    chunks: any[],
+    filename: string,
+    session: Date
+  ) {
+    const blob = new File(chunks, `${filename}.webm`, { type: 'video/webm' });
+
     const metadata: Metadata = {
-      name: filename,
+      name: `${filename}.webm`,
       part: round,
       deviceName: this.deviceName.nativeElement.value,
       durationInSeconds: chunks.length * 2,
-      session: this.session!
+      session: session!,
     };
 
-    this.videoStorageService.uploadFile(file, metadata).subscribe(console.log, console.error);
+    await this.videoStorageService.uploadFile(blob, metadata);
   }
 }
