@@ -22,7 +22,7 @@ export class StreamerComponent implements OnInit {
   private stream: MediaStream | null = null;
   private mediaRecorderInterval: any;
 
-  private session: Date | undefined | null;
+  private sessionStart: Date | undefined | null;
 
   @ViewChild('myVideo', { read: ElementRef })
   myVideo!: ElementRef<HTMLVideoElement>;
@@ -64,7 +64,7 @@ export class StreamerComponent implements OnInit {
             mediaRecorder.ondataavailable = async (e: any) => chunks.push(e.data);
             mediaRecorder.onstop = async (e: any) => {
               const deviceName = this.deviceName.nativeElement.value;
-              await this.transformAndUpload(this.rounds, chunks, `${deviceName}_video_${this.rounds}`, this.session!);
+              await this.transformAndUpload(this.rounds, chunks, `${deviceName}_video_${this.rounds}`, this.sessionStart!);
               this.rounds++;
             }
             setTimeout(() => {
@@ -79,7 +79,7 @@ export class StreamerComponent implements OnInit {
         .catch((err) => {
           this.errors.push(err);
         });
-      this.session = new Date();
+      this.sessionStart = new Date();
     } else {
       this.isNameDisabled = false;
       
@@ -89,7 +89,7 @@ export class StreamerComponent implements OnInit {
       if (this.stream) {
         this.stream.getTracks().forEach((track) => track.stop());
       }
-      this.session = null;
+      this.sessionStart = null;
 
       // this is so the clearInterval has time to run the last one without a messed up rounds param
       setTimeout(() => {
@@ -104,7 +104,7 @@ export class StreamerComponent implements OnInit {
     round: number,
     chunks: any[],
     filename: string,
-    session: Date
+    sessionStart: Date
   ) {
     const blob = new File(chunks, `${filename}.webm`, { type: 'video/webm' });
 
@@ -113,7 +113,7 @@ export class StreamerComponent implements OnInit {
       part: round,
       deviceName: this.deviceName.nativeElement.value,
       durationInSeconds: chunks.length * 2,
-      session: session!,
+      sessionStart: sessionStart!,
     };
 
     await this.videoStorageService.uploadFile(blob, metadata);

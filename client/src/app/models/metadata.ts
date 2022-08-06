@@ -3,5 +3,5 @@ export interface Metadata {
   part: number;
   deviceName: string;
   durationInSeconds: number;
-  session: Date;
+  sessionStart: Date;
 }
