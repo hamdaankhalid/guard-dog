@@ -9,10 +9,7 @@ import com.guarddog.guard_dog_video_storage.repositories.VideoMetadataRepository
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Service
 public class MetadataService {
@@ -33,7 +30,7 @@ public class MetadataService {
         if (sessionExists){
             session = sessionRepository.findOneByDeviceNameAndSessionStart(deviceName, sessionStart);
         } else {
-            session = sessionRepository.save(new Session(1234, deviceName, sessionStart, durationSeconds, Unit.SECONDS));
+            session = sessionRepository.save(new Session(1234, deviceName, sessionStart, durationSeconds, Unit.SECONDS, new HashSet<>()));
         }
 
         // persist videoMetadata for session and associate the above session with it

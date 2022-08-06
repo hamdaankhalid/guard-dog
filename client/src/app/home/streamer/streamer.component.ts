@@ -64,7 +64,12 @@ export class StreamerComponent implements OnInit {
             mediaRecorder.ondataavailable = async (e: any) => chunks.push(e.data);
             mediaRecorder.onstop = async (e: any) => {
               const deviceName = this.deviceName.nativeElement.value;
-              await this.transformAndUpload(this.rounds, chunks, `${deviceName}_video_${this.rounds}`, this.sessionStart!);
+              await this.transformAndUpload(
+                this.rounds, 
+                chunks, 
+                `${deviceName}_${this.sessionStart?.toUTCString()}_video_${this.rounds}`, 
+                this.sessionStart!
+              );
               this.rounds++;
             }
             setTimeout(() => {
@@ -89,11 +94,11 @@ export class StreamerComponent implements OnInit {
       if (this.stream) {
         this.stream.getTracks().forEach((track) => track.stop());
       }
-      this.sessionStart = null;
 
       // this is so the clearInterval has time to run the last one without a messed up rounds param
       setTimeout(() => {
         this.rounds = 0;
+        this.sessionStart = null;
       }, 2_000);
     }
   }

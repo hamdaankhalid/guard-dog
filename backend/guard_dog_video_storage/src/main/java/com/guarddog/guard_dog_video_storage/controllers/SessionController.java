@@ -17,7 +17,7 @@ public class SessionController {
 
     @GetMapping("/sessions")
     public ResponseEntity<List<Session>> getSessions() {
-        List<Session> sessions = metadataService.getSessions(123);
+        List<Session> sessions = metadataService.getSessions(1234);
 
         return new ResponseEntity<>(sessions, HttpStatus.OK);
     }

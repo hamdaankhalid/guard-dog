@@ -18,12 +18,13 @@ import java.util.Set;
 })
 public class Session {
 
-    public Session(int userId, String deviceName, Date sessionStart, int duration, Unit durationUnit) {
+    public Session(int userId, String deviceName, Date sessionStart, int duration, Unit durationUnit, Set<VideoMetadata> VideoMetadatas) {
         this.userId = userId;
         this.deviceName = deviceName;
         this.sessionStart = sessionStart;
         this.duration = duration;
         this.durationUnit = durationUnit;
+        this.videoMetadatas = VideoMetadatas;
     }
 
     @Id
@@ -31,7 +32,7 @@ public class Session {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(name = "user_id", nullable = false)
     private int userId;
 
     // deviceName + sessionStart should be unique
@@ -48,6 +49,6 @@ public class Session {
     private Unit durationUnit;
 
     @OneToMany(cascade=CascadeType.ALL, mappedBy = "session")
-    private Set<VideoMetadata> VideoMetadatas;
+    private Set<VideoMetadata> videoMetadatas;
 
 }
