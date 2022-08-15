@@ -12,11 +12,12 @@ import javax.persistence.*;
 @Setter
 public class VideoMetadata {
 
-    public VideoMetadata(int part, int duration, String filename, Session session) {
+    public VideoMetadata(int part, int duration, String filename, Session session, String url) {
         this.part = part;
         this.duration = duration;
         this.filename = filename;
         this.session = session;
+        this.url = url;
     }
 
     @Id
@@ -32,4 +33,6 @@ public class VideoMetadata {
 
     @ManyToOne(fetch = FetchType.LAZY)
     private Session session;
+
+    private String url;
 }

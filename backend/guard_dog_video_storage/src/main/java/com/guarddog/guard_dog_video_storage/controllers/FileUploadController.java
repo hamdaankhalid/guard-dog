@@ -29,8 +29,8 @@ public class FileUploadController {
             @RequestParam("metadata") String metadata
     ) throws IOException {
         VideoMetadataDto videoMetadata = new ObjectMapper().readValue(metadata, VideoMetadataDto.class);
-        cloudStoreService.uploadBlob(file, videoMetadata.getName());
-        metadataService.upload(videoMetadata);
+        String url = cloudStoreService.uploadBlob(file, videoMetadata.getName());
+        metadataService.upload(videoMetadata, url);
 
         return ResponseEntity.ok().build();
     }

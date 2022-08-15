@@ -1,6 +1,5 @@
 package com.guarddog.guard_dog_video_storage.entities;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
