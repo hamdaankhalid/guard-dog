@@ -12,6 +12,7 @@ import java.util.Date;
 @Setter
 @Getter
 public class VideoMetadataDto {
+    private int userId;
     private String name;
     private int part;
     private String deviceName;

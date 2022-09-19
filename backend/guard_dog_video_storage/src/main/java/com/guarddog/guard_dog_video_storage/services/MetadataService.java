@@ -24,13 +24,14 @@ public class MetadataService {
         String deviceName = videoMetadataDto.getDeviceName();
         Date sessionStart = videoMetadataDto.getSessionStart();
         int durationSeconds = videoMetadataDto.getDurationInSeconds();
+        int userId = videoMetadataDto.getUserId();
 
         Session session;
         boolean sessionExists = sessionRepository.existsByDeviceNameAndSessionStart(deviceName, sessionStart);
         if (sessionExists){
             session = sessionRepository.findOneByDeviceNameAndSessionStart(deviceName, sessionStart);
         } else {
-            session = sessionRepository.save(new Session(1234, deviceName, sessionStart, durationSeconds, Unit.SECONDS, new HashSet<>()));
+            session = sessionRepository.save(new Session(userId, deviceName, sessionStart, durationSeconds, Unit.SECONDS, new HashSet<>()));
         }
 
         // persist videoMetadata for session and associate the above session with it

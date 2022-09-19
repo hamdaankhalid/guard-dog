@@ -119,6 +119,7 @@ export class StreamerComponent implements OnInit {
       deviceName: this.deviceName.nativeElement.value,
       durationInSeconds: chunks.length * 2,
       sessionStart: sessionStart!,
+      userId: 123 // TODO: this is hardcoded at the moment need to make this dynamicaly taken from the user's logged in ID
     };
 
     await this.videoStorageService.uploadFile(blob, metadata);

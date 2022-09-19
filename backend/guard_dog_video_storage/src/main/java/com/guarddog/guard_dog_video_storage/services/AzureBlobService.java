@@ -6,14 +6,18 @@ import com.azure.storage.blob.BlobServiceClient;
 import com.azure.storage.blob.BlobServiceClientBuilder;
 import com.azure.storage.blob.models.BlobErrorCode;
 import com.azure.storage.blob.models.BlobStorageException;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
 
 public class AzureBlobService {
+    @Value("${AZURE_CONTAINER_SAS_TOKEN:NA}")
+    private String sasToken;
+
     private BlobServiceClient blobServiceClient = new BlobServiceClientBuilder()
             .endpoint("https://guarddogvideostore.blob.core.windows.net/")
-            .sasToken("token") // TODO: SAS token tbd
+            .sasToken(sasToken)
             .buildClient();
 
     private BlobContainerClient blobContainerClient;
