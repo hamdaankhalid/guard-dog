@@ -16,18 +16,23 @@ export class VideoStorageService {
     const formData = new FormData();
     formData.append("base64file", file);
     formData.append("metadata", JSON.stringify(metadata));
+    const options = {headers: new HttpHeaders().set("Authorization", `Bearer ${localStorage.getItem('access_token')}`)}
 
-    return this.httpClient.post(this.VIDEO_STORAGE_API_URL+"/miniupload", formData).toPromise();
+    return this.httpClient.post(this.VIDEO_STORAGE_API_URL+"/miniupload", formData, options).toPromise();
   }
 
   // returns a list of all sessions, with optional parameter of deviceName
   getListOfSessions(deviceName: string | null = null) {
+    const headers = new HttpHeaders().set("Authorization", `Bearer ${localStorage.getItem('access_token')}`);
+
     const options = deviceName ? { params: { "device": deviceName } } : undefined;
-    return this.httpClient.get<Session[]>(`${this.VIDEO_STORAGE_API_URL}/sessions`, options);
+    return this.httpClient.get<Session[]>(`${this.VIDEO_STORAGE_API_URL}/sessions`, {...options, headers});
   }
 
   // returns a single session and all the child video id's and metadata
   getSession(sessionId: string) {
-    return this.httpClient.get(`${this.VIDEO_STORAGE_API_URL}/sessions/${sessionId}`);
+    const options = {headers: new HttpHeaders().set("Authorization", `Bearer ${localStorage.getItem('access_token')}`)}
+
+    return this.httpClient.get(`${this.VIDEO_STORAGE_API_URL}/sessions/${sessionId}`, options);
   }
 }

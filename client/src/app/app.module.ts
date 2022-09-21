@@ -12,9 +12,10 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { ApiInterceptor } from './interceptors/api.interceptor';
 import { StreamerComponent } from './home/streamer/streamer.component';
-import { ViewLiveStreamComponent } from './home/view-live-stream/view-live-stream.component';
 import { LandingPageComponent } from './public/landing-page/landing-page.component';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { AiComponent } from './home/ai/ai.component';
+import { NotificationCenterComponent } from './home/notification-center/notification-center.component';
 
 @NgModule({
   declarations: [
@@ -25,8 +26,9 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
     FooterComponent,
     HomeComponent,
     StreamerComponent,
-    ViewLiveStreamComponent,
-    LandingPageComponent
+    LandingPageComponent,
+    AiComponent,
+    NotificationCenterComponent
   ],
   imports: [
     BrowserModule,
@@ -37,11 +39,11 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
     NgbModule,
   ],
   providers: [
-    // {
-    //   provide: HTTP_INTERCEPTORS,
-    //   useClass: ApiInterceptor,
-    //   multi: true,
-    // }
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: ApiInterceptor,
+      multi: true,
+    }
   ],
   bootstrap: [AppComponent]
 })

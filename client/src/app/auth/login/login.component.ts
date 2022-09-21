@@ -48,16 +48,16 @@ export class LoginComponent implements OnInit {
     console.log(this.loginForm.value);
     
     this.authService.signin(this.loginForm.value.email, this.loginForm.value.password).subscribe((response: any) => {
-      if (response.status === 200) {
-        this.loading = false;
-        this.router.navigate(['/home']);
-      } else {
-        // show error
-        this.loading = false;
-      }
+        
+        this.authService.identity().subscribe((_: any) => {
+          this.loading = false;
+          this.router.navigate(['/home']); 
+        });
+        
     }, (_: any) => {
         // show error
         this.loading = false;
+        console.error(_);
         return;
     })
   }

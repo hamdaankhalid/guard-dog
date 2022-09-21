@@ -8,12 +8,38 @@ import { VideoStorageService } from 'src/app/services/video-storage.service';
 })
 export class HomeComponent implements OnInit {
   sessions: Session[] = [];
+  showSession: Record<number, boolean> = {};
+  
+  private queryInterval: any;
 
   constructor(private videoStorageService: VideoStorageService) {}
 
   ngOnInit(): void {
+    this.querySessions();
+    this.queryInterval = setInterval(() => {
+        this.querySessions();
+    }, 10_000);
+  }
+
+  ngOnDestroy(): void {
+    clearInterval(this.queryInterval);
+  }
+
+  querySessions() {
     this.videoStorageService.getListOfSessions().subscribe((sessions: Session[]) => {
       this.sessions = sessions;
-    }, alert);
+
+      sessions.forEach((ses: Session) => {
+        const showVal = ses.id in this.showSession ? this.showSession[ses.id] : false;
+        this.showSession[ses.id] =  showVal;
+      });
+
+      console.log(this.showSession);
+    });
+  }
+
+  viewRecordings(sessionid: number) {
+    this.showSession[sessionid] = !this.showSession[sessionid];
+    console.log(this.showSession[sessionid]);
   }
 }

@@ -11,7 +11,6 @@ export class NavbarComponent implements OnInit {
   currentUser: any;
 
   constructor(
-    private router: Router,
     private authenticationService: AuthService
   ) {
   }
@@ -23,8 +22,8 @@ export class NavbarComponent implements OnInit {
   }
 
   logout() {
-      this.authenticationService.logout();
-      this.router.navigate(['/login']);
-  }
-
+    this.authenticationService.logout();
+  };
 }
+
+

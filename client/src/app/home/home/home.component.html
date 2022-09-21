@@ -1,23 +1,41 @@
-<a class="nav-item nav-link" routerLink="/streamer" > Stream from device </a>
-
-<a class="nav-item nav-link" routerLink="/view-live-stream" > View live stream </a>
-
-
 <div *ngIf="sessions.length > 0; else elseBlock">
-  <div>Previous Recordings!</div>
-  
-  <div *ngFor="let session of sessions">
-    <h3>{{ session.sessionId }} on {{ session.deviceName }}</h3>
-    <div>
-      TimeStarted: {{ session.timeStarted }} 
-      &
-      Duration: {{ session.duration }}
-    </div>
-    <a>Click here to view the recordings!</a>
-  </div>
+  <div>Previous Recordings:</div>
 
+  <div *ngFor="let session of sessions" class="card">
+    <div class="body">
+      <div>Session Id: {{ session.id }}</div>
+
+      <div>Device Name{{ session.deviceName }}</div>
+
+      <div>TimeStarted: {{ session.sessionStart }}</div>
+
+      <div>
+        Duration: {{ session.duration }}
+        {{ session.durationUnit.toLowerCase() }}
+      </div>
+    </div>
+
+    <button
+      (click)="viewRecordings(session.id)"
+      class="btn btn-link"
+      aria-expanded="true"
+    >
+      View Recordings:
+    </button>
+
+    <div
+      *ngIf="showSession[session.id]"
+    >
+      <ul class="list-group list-group-flush">
+        <li
+          *ngFor="let videoMetadata of session.videoMetadatas"
+          class="list-group-item"
+        >
+          <a href="{{ videoMetadata.url }}">{{ videoMetadata.part}}: {{ videoMetadata.url }}</a>
+        </li>
+      </ul>
+    </div>
+  </div>
 </div>
 
-<ng-template #elseBlock>
-  You have no recordings at the moment!
-</ng-template>
+<ng-template #elseBlock> You have no recordings at the moment! </ng-template>

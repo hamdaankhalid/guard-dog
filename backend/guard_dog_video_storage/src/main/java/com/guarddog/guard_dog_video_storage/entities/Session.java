@@ -1,5 +1,8 @@
 package com.guarddog.guard_dog_video_storage.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -10,6 +13,7 @@ import java.util.Set;
 
 @Entity
 @NoArgsConstructor
+@AllArgsConstructor
 @Getter
 @Setter
 @Table(uniqueConstraints={
@@ -17,13 +21,13 @@ import java.util.Set;
 })
 public class Session {
 
-    public Session(int userId, String deviceName, Date sessionStart, int duration, Unit durationUnit, Set<VideoMetadata> VideoMetadatas) {
-        this.userId = userId;
+    public Session(ServiceUser serviceUser, String deviceName, Date sessionStart, int duration, Unit durationUnit, Set<VideoMetadata> videoMetadatas) {
+        this.serviceUser = serviceUser;
         this.deviceName = deviceName;
         this.sessionStart = sessionStart;
         this.duration = duration;
         this.durationUnit = durationUnit;
-        this.videoMetadatas = VideoMetadatas;
+        this.videoMetadatas = videoMetadatas;
     }
 
     @Id
@@ -31,8 +35,14 @@ public class Session {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @Column(name = "user_id", nullable = false)
-    private int userId;
+    @JsonBackReference
+    @ManyToOne
+    @JoinColumn(name = "service_user_id")
+    private ServiceUser serviceUser;
+
+    @JsonManagedReference
+    @OneToMany(cascade=CascadeType.ALL, mappedBy = "parentSession")
+    private Set<VideoMetadata> videoMetadatas;
 
     // deviceName + sessionStart should be unique
     @Column(nullable = false)
@@ -46,8 +56,5 @@ public class Session {
 
     @Column(nullable = false)
     private Unit durationUnit;
-
-    @OneToMany(cascade=CascadeType.ALL, mappedBy = "session")
-    private Set<VideoMetadata> videoMetadatas;
 
 }

@@ -1,5 +1,7 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { Metadata } from 'src/app/models/metadata';
+import { User } from 'src/app/models/user';
+import { AuthService } from 'src/app/services/auth.service';
 import { VideoStorageService } from 'src/app/services/video-storage.service';
 
 declare var MediaRecorder: any;
@@ -30,7 +32,11 @@ export class StreamerComponent implements OnInit {
   @ViewChild('deviceName', { read: ElementRef })
   deviceName!: ElementRef<HTMLInputElement>;
 
-  constructor(private videoStorageService: VideoStorageService) {}
+  activeUser: User | null = null;
+
+  constructor(private videoStorageService: VideoStorageService, private authenticationService: AuthService) {
+    this.authenticationService.currentUser.subscribe((res: User | null) => this.activeUser = res);
+  }
 
   ngOnInit(): void {
     setInterval(() => (this.timer = new Date()), 1000);
@@ -76,9 +82,9 @@ export class StreamerComponent implements OnInit {
               if (mediaRecorder.state !== "inactive") {
                 mediaRecorder.stop()
               }
-            }, 60_000);
+            }, 5_000);
             mediaRecorder.start();
-          }, 60_000);
+          }, 5_000);
  
         })
         .catch((err) => {
@@ -119,7 +125,7 @@ export class StreamerComponent implements OnInit {
       deviceName: this.deviceName.nativeElement.value,
       durationInSeconds: chunks.length * 2,
       sessionStart: sessionStart!,
-      userId: 123 // TODO: this is hardcoded at the moment need to make this dynamicaly taken from the user's logged in ID
+      userId: this.activeUser!.id
     };
 
     await this.videoStorageService.uploadFile(blob, metadata);

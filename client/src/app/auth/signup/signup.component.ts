@@ -45,16 +45,9 @@ export class SignupComponent implements OnInit {
     }
 
     // make a post request if we succeed forward to login page
-    console.log(this.signupForm.value);
-
     this.authService.signup(this.signupForm.value.email, this.signupForm.value.password).subscribe((response: any) => {
-      if (response.status === 200) {
-        this.loading = false;
-        this.router.navigate(['/login']);
-      } else {
-        // show error
-        this.loading = false;
-      }
+      this.loading = false;
+      this.router.navigate(['/login']);
     }, (_: any) => {
         // show error
         this.loading = false;
