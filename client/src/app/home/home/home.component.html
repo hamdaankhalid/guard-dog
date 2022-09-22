@@ -9,10 +9,10 @@
 
       <div>TimeStarted: {{ session.sessionStart }}</div>
 
-      <div>
+      <!-- <div>
         Duration: {{ session.duration }}
         {{ session.durationUnit.toLowerCase() }}
-      </div>
+      </div> -->
     </div>
 
     <button
@@ -31,7 +31,7 @@
           *ngFor="let videoMetadata of session.videoMetadatas"
           class="list-group-item"
         >
-          <a href="{{ videoMetadata.url }}">{{ videoMetadata.part}}: {{ videoMetadata.url }}</a>
+        <a href="{{ videoMetadata.url }}" download="{{ videoMetadata.id }}">Part {{ videoMetadata.part }}</a>
         </li>
       </ul>
     </div>

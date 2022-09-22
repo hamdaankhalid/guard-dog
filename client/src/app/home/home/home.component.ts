@@ -34,12 +34,13 @@ export class HomeComponent implements OnInit {
         this.showSession[ses.id] =  showVal;
       });
 
-      console.log(this.showSession);
     });
   }
 
   viewRecordings(sessionid: number) {
     this.showSession[sessionid] = !this.showSession[sessionid];
-    console.log(this.showSession[sessionid]);
+    if (this.showSession[sessionid]) {
+      this.sessions[sessionid].videoMetadatas.sort((a, b) => b.part - a.part);
+    }
   }
 }

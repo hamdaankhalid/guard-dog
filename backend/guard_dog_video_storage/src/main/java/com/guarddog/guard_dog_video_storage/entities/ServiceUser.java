@@ -29,8 +29,4 @@ public class ServiceUser {
     @JsonManagedReference
     @OneToMany(cascade=CascadeType.ALL, mappedBy = "serviceUser")
     private Set<Session> sessions;
-
-    @JsonManagedReference
-    @OneToMany(cascade=CascadeType.ALL, mappedBy = "serviceUser")
-    private Set<ModelRegistry> models;
 }

@@ -21,7 +21,7 @@ public class FileUploadController {
 
     @Autowired
     private MetadataService metadataService;
-    
+
     @PostMapping(path = "/miniupload", consumes = { "multipart/form-data" })
     public ResponseEntity uploadFile(
             @RequestParam("base64file") MultipartFile file,

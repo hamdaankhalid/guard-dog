@@ -1,5 +1,24 @@
-<p>
-  Get a list of all models for the currentUser
-  Give ability to delete model
-  Give ability to Upload model
-</p>
+<div *ngFor="let model of registeredModels" class="card">
+  <div class="card-body">
+    Model Name: {{ model.modelName }}
+  </div>
+
+  <button (click)="deleteModel(model.id)" class="btn btn-link">
+    Delete
+  </button>
+</div>
+
+
+<div class="form-group" style="margin-top: 10px;">
+  <div>
+    <input type="file"
+           id="file"
+           (change)="setModel($event)">
+  </div>
+
+  <button (click)="registerModel()" class="btn btn-link"
+  aria-expanded="true">Upload Model</button>
+</div>
+
+<div *ngIf="isUploading" class="alert alert-info" >Uploading your model.....</div>
+<div *ngIf="isDeleting" class="alert alert-info" >Deleting your model.....</div>
