@@ -34,12 +34,19 @@ export class StreamerComponent implements OnInit {
 
   activeUser: User | null = null;
 
+  private timerInterval: any;
+
   constructor(private videoStorageService: VideoStorageService, private authenticationService: AuthService) {
     this.authenticationService.currentUser.subscribe((res: User | null) => this.activeUser = res);
   }
 
   ngOnInit(): void {
-    setInterval(() => (this.timer = new Date()), 1000);
+    this.timerInterval = setInterval(() => (this.timer = new Date()), 1000);
+  }
+
+  ngOnDestroy() {
+    clearInterval(this.timerInterval);
+    clearInterval(this.mediaRecorderInterval);
   }
 
   public toggleWebcam(): void {

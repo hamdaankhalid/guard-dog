@@ -1,4 +1,12 @@
-<p>
-  Query on interval for notifications
-  Each notification displays a list of events and associated url to view video.
-</p>
+<div> Inference Notifications: </div>
+
+  <div *ngFor="let notiification of inferenceNotifications" class="card">
+    <div class="body">
+      <div>Inference Details: {{ notiification.details }}</div>
+      <div>Flagged Video Url:
+        <a href="{{ notiification.videoMetadata.url }}">{{ notiification.videoMetadata.filename }}</a>
+      </div>
+    </div>
+  </div>
+
+

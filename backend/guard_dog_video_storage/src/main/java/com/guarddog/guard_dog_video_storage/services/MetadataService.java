@@ -25,7 +25,7 @@ public class MetadataService {
     @Autowired
     private VideoMetadataRepository videoMetadataRepository;
 
-    public void upload(VideoMetadataDto videoMetadataDto, String url) {
+    public VideoMetadata upload(VideoMetadataDto videoMetadataDto, String url) {
         // If the sessionStart + deviceName doesn't already exist create a new session
         String deviceName = videoMetadataDto.getDeviceName();
         Date sessionStart = videoMetadataDto.getSessionStart();
@@ -42,14 +42,23 @@ public class MetadataService {
 
         // persist videoMetadata for session and associate the above session with it
         VideoMetadata videoMetadata = new VideoMetadata(
+                -1,
+                session,
                 videoMetadataDto.getPart(),
                 durationSeconds,
                 deviceName,
-                url,
-                session
+                url
         );
-        videoMetadataRepository.save(videoMetadata);
+
+
+        VideoMetadata savedMetaData = videoMetadataRepository.save(videoMetadata);
         session.getVideoMetadatas().add(videoMetadata);
         sessionRepository.save(session);
+        return savedMetaData;
+    }
+
+
+    public VideoMetadata getById(int id) {
+        return videoMetadataRepository.findById(id).get();
     }
 }

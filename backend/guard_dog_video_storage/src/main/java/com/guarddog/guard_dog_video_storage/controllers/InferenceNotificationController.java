@@ -1,5 +1,6 @@
 package com.guarddog.guard_dog_video_storage.controllers;
 
+import com.guarddog.guard_dog_video_storage.dto.InferenceNotificationDto;
 import com.guarddog.guard_dog_video_storage.entities.InferenceNotification;
 import com.guarddog.guard_dog_video_storage.entities.ServiceUser;
 import com.guarddog.guard_dog_video_storage.services.InferenceNotificationService;
@@ -21,10 +22,10 @@ public class InferenceNotificationController {
     @Autowired
     private UserService userService;
 
-    @GetMapping("/inferences")
-    public ResponseEntity<Collection<InferenceNotification>> getInferenceNotifications(Principal principal) {
+    @GetMapping(path = "/inferences")
+    public ResponseEntity<Collection<InferenceNotificationDto>> getInferenceNotifications(Principal principal) {
         ServiceUser user = userService.getUser(principal.getName());
-        Collection<InferenceNotification> notifications = inferenceNotificationService.getAll(user);
+        Collection<InferenceNotificationDto> notifications = inferenceNotificationService.getAll(user);
         return new ResponseEntity<>(notifications, HttpStatus.OK);
     }
 }

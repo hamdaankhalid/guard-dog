@@ -3,6 +3,10 @@
     Model Name: {{ model.modelName }}
   </div>
 
+  <a (click)="downloadModel(model.id, model.modelName)" class="btn btn-link" download>
+    Download 
+  </a>
+
   <button (click)="deleteModel(model.id)" class="btn btn-link">
     Delete
   </button>
@@ -21,4 +25,18 @@
 </div>
 
 <div *ngIf="isUploading" class="alert alert-info" >Uploading your model.....</div>
+<div *ngIf="isFailedUploading" class="alert alert-danger"  role="alert">Failed to upload your model
+  
+</div>
+
 <div *ngIf="isDeleting" class="alert alert-info" >Deleting your model.....</div>
+<div *ngIf="isFailedDeleting" class="alert alert-danger"  role="alert">Failed to delete your model
+  
+</div>
+
+
+<div *ngIf="isRetrieving" class="alert alert-info" >Downloading your model.....</div>
+<div *ngIf="isFailedRetrieving" class="alert alert-danger"  role="alert">Failed to download your model
+  
+</div>
+

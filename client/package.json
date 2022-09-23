@@ -23,6 +23,7 @@
     "@ng-bootstrap/ng-bootstrap": "^13.0.0",
     "@popperjs/core": "^2.10.2",
     "bootstrap": "^5.2.0",
+    "file-saver": "^2.0.5",
     "rxjs": "~7.4.0",
     "tslib": "^2.3.0",
     "zone.js": "~0.11.4"
@@ -36,6 +37,7 @@
     "@angular-eslint/template-parser": "14.1.2",
     "@angular/cli": "^14.1.0",
     "@angular/compiler-cli": "^14.1.0",
+    "@types/file-saver": "^2.0.5",
     "@types/jasmine": "~3.10.0",
     "@types/node": "^12.11.1",
     "@typescript-eslint/eslint-plugin": "5.37.0",

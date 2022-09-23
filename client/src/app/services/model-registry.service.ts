@@ -18,6 +18,11 @@ export class ModelRegistryService {
     return this.httpClient.post(this.MODEL_API_URL, formData, options).toPromise();
   }
 
+  getModel(id: number) {
+    const options: Object = {headers: new HttpHeaders().set("Authorization", `Bearer ${localStorage.getItem('access_token')}`), responseType: 'blob'};
+    return this.httpClient.get<Blob>(`${this.MODEL_API_URL}/${id}`, options);
+  }
+
   getModels() {
     const options = {headers: new HttpHeaders().set("Authorization", `Bearer ${localStorage.getItem('access_token')}`)};
     return this.httpClient.get<RegisteredModel[]>(this.MODEL_API_URL, options);

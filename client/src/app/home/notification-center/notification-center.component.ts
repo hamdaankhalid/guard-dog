@@ -1,4 +1,6 @@
 import { Component, OnInit } from '@angular/core';
+import { InferenceNotification } from 'src/app/models/inference-notification';
+import { InferenceNotificationService } from 'src/app/services/inference-notification.service';
 
 @Component({
   selector: 'app-notification-center',
@@ -7,9 +9,23 @@ import { Component, OnInit } from '@angular/core';
 })
 export class NotificationCenterComponent implements OnInit {
 
-  constructor() { }
+  inferenceNotifications: InferenceNotification[] = [];
+  queryInterval: any;
+
+  constructor(private inferenceNotificationService: InferenceNotificationService) { }
 
   ngOnInit(): void {
+    this.getNotifications();
+    this.queryInterval = setInterval(() => this.getNotifications(), 10_000);
   }
 
+  ngOnDestroy(): void {
+    clearInterval(this.queryInterval);
+  }
+
+  getNotifications() {
+    this.inferenceNotificationService.getAll().subscribe((inferences: InferenceNotification[]) => {
+      this.inferenceNotifications = inferences;
+    });
+  }
 }
