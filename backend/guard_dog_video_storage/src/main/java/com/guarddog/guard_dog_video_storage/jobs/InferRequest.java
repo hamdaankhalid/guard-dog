@@ -6,17 +6,18 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.jobrunr.jobs.lambdas.JobRequest;
 
-/**
- * Not a job but used as the type for generics for inference job
- */
-@Getter @Setter @AllArgsConstructor @NoArgsConstructor
-public class InferenceRequest implements JobRequest {
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+public class InferRequest implements JobRequest {
     private int videoMetadataId;
     private int userId;
+    private int modelId;
     private String details;
 
     @Override
-    public Class<InferenceRequestHandler> getJobRequestHandler() {
-        return InferenceRequestHandler.class;
+    public Class<InferRequestHandler> getJobRequestHandler() {
+        return InferRequestHandler.class;
     }
 }
