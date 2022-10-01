@@ -17,8 +17,7 @@ public class InferenceRequestHandler implements JobRequestHandler<InferenceReque
     public void run(InferenceRequest inferenceRequest) throws Exception {
         inferenceNotificationService.infer(
                 inferenceRequest.getUserId(),
-                inferenceRequest.getVideoMetadataId(),
-                inferenceRequest.getDetails()
+                inferenceRequest.getVideoMetadataId()
         );
     }
 }

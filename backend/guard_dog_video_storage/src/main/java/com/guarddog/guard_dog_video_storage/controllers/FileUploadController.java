@@ -42,8 +42,7 @@ public class FileUploadController {
         BackgroundJobRequest.enqueue(
             new InferenceRequest(
                     savedMetadata.getId(),
-                    userService.getUser(principal.getName()).getId(),
-                    "done"
+                    userService.getUser(principal.getName()).getId()
             )
         );
         return ResponseEntity.ok().build();

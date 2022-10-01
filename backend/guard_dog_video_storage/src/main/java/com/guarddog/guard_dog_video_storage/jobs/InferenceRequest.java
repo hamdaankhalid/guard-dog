@@ -15,6 +15,11 @@ public class InferenceRequest implements JobRequest {
     private int userId;
     private String details;
 
+    public InferenceRequest(int videoMetadataId, int userId) {
+        this.videoMetadataId = videoMetadataId;
+        this.userId = userId;
+    }
+
     @Override
     public Class<InferenceRequestHandler> getJobRequestHandler() {
         return InferenceRequestHandler.class;

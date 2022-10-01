@@ -33,7 +33,7 @@ public class InferenceNotificationService {
         return inferenceNotificationRepository.findAllByServiceUserId(userId);
     }
 
-    public boolean infer(int userId, int videoMetadataId, String details) {
+    public boolean infer(int userId, int videoMetadataId) {
         try {
             ServiceUser user = userService.getUser(userId);
             Collection<ModelRegistryMetadata> models = modelRegistryService.getModels(user);
@@ -41,7 +41,7 @@ public class InferenceNotificationService {
 
             for (ModelRegistryMetadata model: models) {
                 BackgroundJobRequest.enqueue(
-                        new InferRequest(videoMetadataId, userId, model.getId(), details)
+                        new InferRequest(videoMetadataId, userId, model.getId())
                 );
             }
 

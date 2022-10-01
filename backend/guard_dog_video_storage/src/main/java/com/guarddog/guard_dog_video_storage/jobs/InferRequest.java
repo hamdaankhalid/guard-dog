@@ -16,6 +16,12 @@ public class InferRequest implements JobRequest {
     private int modelId;
     private String details;
 
+    public InferRequest(int videoMetadataId, int userId, int modelId) {
+        this.videoMetadataId = videoMetadataId;
+        this.userId = userId;
+        this.modelId = modelId;
+    }
+
     @Override
     public Class<InferRequestHandler> getJobRequestHandler() {
         return InferRequestHandler.class;

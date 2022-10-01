@@ -1,6 +1,7 @@
 package com.guarddog.guard_dog_video_storage.jobs;
 
 import ai.onnxruntime.OrtEnvironment;
+import ai.onnxruntime.OrtException;
 import ai.onnxruntime.OrtSession;
 import com.guarddog.guard_dog_video_storage.entities.ModelRegistry;
 import com.guarddog.guard_dog_video_storage.entities.ServiceUser;
@@ -33,25 +34,21 @@ public class InferRequestHandler implements JobRequestHandler<InferRequest> {
     public void run(InferRequest inferRequest) throws Exception {
         ServiceUser user = userService.getUser(inferRequest.getUserId());
         VideoMetadata videoMetadata = videoMetadatService.getById(inferRequest.getVideoMetadataId());
-
-        System.out.println("LOAD MODEL HERE FOR INFERENCE");
-        System.out.println("RUN INFERENCE");
-        System.out.println("IF INFERENCE PRODUCES SIGNIFICANT RESULT SAVE NOTIFICATION");
-
-        inferenceNotificationService.save(user, videoMetadata, inferRequest.getDetails());
-
-        // Join blazor community HK
+        ModelRegistry mr = modelRegistryService.getModel(user, inferRequest.getModelId());
 
         // load model
-        // ModelRegistry mr = modelRegistryService.getModel(user, inferRequest.getModelId());
-        // byte[] modelAsByte = mr.getModelByteData();
-        // OrtEnvironment env = OrtEnvironment.getEnvironment();
-        // String tempModelFile = Path();
+        OrtSession session = createSession(mr);
 
-        // session = env.createSession(tempModelFile,new OrtSession.SessionOptions());
+        // TODO: run inference from session
 
-        // run inference
+        // save inference
+        inferenceNotificationService.save(user, videoMetadata, "RESULT FROM INFERENCE");
+    }
 
-        // based on result write save notification
+    private OrtSession createSession(ModelRegistry mr) throws OrtException {
+        byte[] modelAsByte = mr.getModelByteData();
+        OrtEnvironment env = OrtEnvironment.getEnvironment();
+        OrtSession session = env.createSession(modelAsByte);
+        return session;
     }
 }
