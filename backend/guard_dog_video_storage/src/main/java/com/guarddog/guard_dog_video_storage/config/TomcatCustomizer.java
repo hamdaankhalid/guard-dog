@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class TomcatCustomizer implements WebServerFactoryCustomizer<TomcatServletWebServerFactory> {
-
+    // Had to customize tomcat server to allow file upload size to be larger than default
     public void customize(TomcatServletWebServerFactory factory) {
 
         factory.addConnectorCustomizers(new TomcatConnectorCustomizer() {

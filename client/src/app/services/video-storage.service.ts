@@ -14,7 +14,7 @@ export class VideoStorageService {
 
   uploadFile(file: File, metadata: Metadata) {
     const formData = new FormData();
-    formData.append("base64file", file);
+    formData.append("file", file);
     formData.append("metadata", JSON.stringify(metadata));
     const options = {headers: new HttpHeaders().set("Authorization", `Bearer ${localStorage.getItem('access_token')}`)}
 

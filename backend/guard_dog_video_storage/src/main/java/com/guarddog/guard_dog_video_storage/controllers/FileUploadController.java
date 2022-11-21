@@ -7,9 +7,13 @@ import com.guarddog.guard_dog_video_storage.jobs.InferenceRequest;
 import com.guarddog.guard_dog_video_storage.services.CloudStoreService;
 import com.guarddog.guard_dog_video_storage.services.MetadataService;
 import com.guarddog.guard_dog_video_storage.services.UserService;
+import lombok.Getter;
+import lombok.Setter;
 import org.jobrunr.scheduling.BackgroundJobRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -30,14 +34,25 @@ public class FileUploadController {
     @Autowired
     private UserService userService;
 
-    @PostMapping(path = "/miniupload", consumes = { "multipart/form-data" })
+    // TODO: CHECK IF FIX DOUBLE UPLOAD
+    @PostMapping(path = "/miniupload", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
     public ResponseEntity uploadFile(
-            @RequestParam("base64file") MultipartFile file,
-            @RequestParam("metadata") String metadata,
+            @ModelAttribute MiniFileUploadRequest request,
             Principal principal
     ) throws IOException {
-        VideoMetadataDto videoMetadata = new ObjectMapper().readValue(metadata, VideoMetadataDto.class);
-        String url = cloudStoreService.uploadBlob(file, videoMetadata.getName());
+        VideoMetadataDto videoMetadata = new ObjectMapper().readValue(request.getMetadata(), VideoMetadataDto.class);
+
+        // only if the video metadata has not been saved once before already upload
+        if (metadataService.containsVideoMetadata(
+                videoMetadata.getDeviceName(),
+                videoMetadata.getSessionStart(),
+                videoMetadata.getPart())
+        ) {
+            return ResponseEntity.ok().build();
+        }
+
+        String url = cloudStoreService.uploadBlob(request.getFile(), videoMetadata.getName());
+        System.out.println("Processing: " + videoMetadata.getPart());
         VideoMetadata savedMetadata = metadataService.upload(videoMetadata, url);
         BackgroundJobRequest.enqueue(
             new InferenceRequest(
@@ -48,3 +63,9 @@ public class FileUploadController {
         return ResponseEntity.ok().build();
     }
 }
+
+@Getter @Setter
+class MiniFileUploadRequest{
+    private MultipartFile file;
+    private String metadata;
+};

@@ -1,6 +1,5 @@
 package com.guarddog.guard_dog_video_storage.services;
 
-import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.BlobServiceClient;
 import com.azure.storage.blob.BlobServiceClientBuilder;
@@ -13,7 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.*;
 @Service
 public class AzureBlobService {
-    private String sasToken = System.getenv("AZURE_CONTAINER_SAS_TOKEN");
+    private final String sasToken = System.getenv("AZURE_CONTAINER_SAS_TOKEN");
 
     private BlobServiceClient blobServiceClient;
 

@@ -61,4 +61,13 @@ public class MetadataService {
     public VideoMetadata getById(int id) {
         return videoMetadataRepository.findById(id).get();
     }
+
+    public boolean containsVideoMetadata(String deviceName, Date sessionStart, int part) {
+        boolean sessionExists = sessionRepository.existsByDeviceNameAndSessionStart(deviceName, sessionStart);
+        if (!sessionExists) {
+            return true;
+        }
+        Session session = sessionRepository.findOneByDeviceNameAndSessionStart(deviceName, sessionStart);
+        return videoMetadataRepository.existsByParentSessionAndPart(session, part);
+    }
 }
