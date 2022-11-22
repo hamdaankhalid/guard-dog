@@ -10,4 +10,6 @@ import java.util.Date;
 @Repository
 public interface VideoMetadataRepository extends JpaRepository<VideoMetadata, Integer> {
     boolean existsByParentSessionAndPart(Session session, int part);
+
+    VideoMetadata findOneByParentSessionAndPart(Session session, int part);
 }

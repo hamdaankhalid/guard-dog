@@ -10,4 +10,5 @@ import java.util.Date;
 public interface SessionRepository extends JpaRepository<Session, Integer> {
     Session findOneByDeviceNameAndSessionStart(String deviceName, Date sessionStart);
     boolean existsByDeviceNameAndSessionStart(String deviceName, Date sessionStart);
+
 }

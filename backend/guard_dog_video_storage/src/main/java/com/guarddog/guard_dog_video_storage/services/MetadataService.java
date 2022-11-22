@@ -31,7 +31,6 @@ public class MetadataService {
         Date sessionStart = videoMetadataDto.getSessionStart();
         int durationSeconds = videoMetadataDto.getDurationInSeconds();
         Optional<ServiceUser> user = userRepository.findById(videoMetadataDto.getUserId());
-
         Session session;
         boolean sessionExists = sessionRepository.existsByDeviceNameAndSessionStart(deviceName, sessionStart);
         if (sessionExists){
@@ -39,7 +38,6 @@ public class MetadataService {
         } else {
             session = sessionRepository.save(new Session(user.get(), deviceName, sessionStart, durationSeconds, Unit.SECONDS, new HashSet<>()));
         }
-
         // persist videoMetadata for session and associate the above session with it
         VideoMetadata videoMetadata = new VideoMetadata(
                 -1,
@@ -50,10 +48,7 @@ public class MetadataService {
                 url
         );
 
-
         VideoMetadata savedMetaData = videoMetadataRepository.save(videoMetadata);
-        session.getVideoMetadatas().add(videoMetadata);
-        sessionRepository.save(session);
         return savedMetaData;
     }
 
@@ -62,10 +57,15 @@ public class MetadataService {
         return videoMetadataRepository.findById(id).get();
     }
 
+    public VideoMetadata getByPartial(String deviceName, Date sessionStart, int part) {
+        Session session = sessionRepository.findOneByDeviceNameAndSessionStart(deviceName, sessionStart);
+        return videoMetadataRepository.findOneByParentSessionAndPart(session, part);
+    }
+
     public boolean containsVideoMetadata(String deviceName, Date sessionStart, int part) {
         boolean sessionExists = sessionRepository.existsByDeviceNameAndSessionStart(deviceName, sessionStart);
         if (!sessionExists) {
-            return true;
+            return false;
         }
         Session session = sessionRepository.findOneByDeviceNameAndSessionStart(deviceName, sessionStart);
         return videoMetadataRepository.existsByParentSessionAndPart(session, part);

@@ -103,7 +103,7 @@ export class StreamerComponent implements OnInit {
             if (mediaRecorder.state !== 'inactive') {
               mediaRecorder.stop();
             }
-          }, 5_000);
+          }, 7_000);
           
         }, 10_000);
       })

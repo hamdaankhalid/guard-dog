@@ -35,30 +35,17 @@ public class FileUploadController {
     @Autowired
     private UserService userService;
 
-    // TODO: CHECK IF FIX DOUBLE UPLOAD
     @PostMapping(path = "/miniupload", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
     public ResponseEntity uploadFile(
             @ModelAttribute MiniFileUploadRequest request,
             Principal principal
     ) throws IOException {
         VideoMetadataDto videoMetadata = new ObjectMapper().readValue(request.getMetadata(), VideoMetadataDto.class);
-
-        System.out.println("part: " + videoMetadata.getPart());
-
-        // only if the video metadata has not been saved once before already upload
-        /**
-         * if (metadataService.containsVideoMetadata(
-         *                 videoMetadata.getDeviceName(),
-         *                 videoMetadata.getSessionStart(),
-         *                 videoMetadata.getPart())
-         *         ) {
-         *             return ResponseEntity.ok().build();
-         *         }
-         */
-
-
         String url = cloudStoreService.uploadBlob(request.getFile(), videoMetadata.getName());
+        System.out.println("part: " + videoMetadata.getPart() + ", " + request.getFile().getName());
         VideoMetadata savedMetadata = metadataService.upload(videoMetadata, url);
+
+        // TODO: Emit to kafka the URL, USER_ID,
         BackgroundJobRequest.enqueue(
             new InferenceRequest(
                     savedMetadata.getId(),
