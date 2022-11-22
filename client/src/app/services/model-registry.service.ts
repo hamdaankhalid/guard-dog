@@ -12,7 +12,7 @@ export class ModelRegistryService {
 
   registerModel(file: File) {
     const formData = new FormData();
-    formData.append("file", file);
+    formData.append("model", file);
     const options = {headers: new HttpHeaders().set("Authorization", `Bearer ${localStorage.getItem('access_token')}`)}
 
     return this.httpClient.post(this.MODEL_API_URL, formData, options).toPromise();
