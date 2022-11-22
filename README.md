@@ -1,5 +1,7 @@
 # Guard Dog
 
+![architecture](./architecture.png)
+
 Computer Vision Infrastructure As A Service
 Use my service to get multiple cameras on the cloud, upload your custom ONNX model and have automatic inference on videos as they come!
 

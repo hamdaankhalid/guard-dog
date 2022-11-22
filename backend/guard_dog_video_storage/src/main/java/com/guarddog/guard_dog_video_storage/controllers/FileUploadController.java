@@ -1,6 +1,7 @@
 package com.guarddog.guard_dog_video_storage.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.guarddog.guard_dog_video_storage.dto.MiniFileUploadRequest;
 import com.guarddog.guard_dog_video_storage.dto.VideoMetadataDto;
 import com.guarddog.guard_dog_video_storage.entities.VideoMetadata;
 import com.guarddog.guard_dog_video_storage.jobs.InferenceRequest;
@@ -42,17 +43,21 @@ public class FileUploadController {
     ) throws IOException {
         VideoMetadataDto videoMetadata = new ObjectMapper().readValue(request.getMetadata(), VideoMetadataDto.class);
 
+        System.out.println("part: " + videoMetadata.getPart());
+
         // only if the video metadata has not been saved once before already upload
-        if (metadataService.containsVideoMetadata(
-                videoMetadata.getDeviceName(),
-                videoMetadata.getSessionStart(),
-                videoMetadata.getPart())
-        ) {
-            return ResponseEntity.ok().build();
-        }
+        /**
+         * if (metadataService.containsVideoMetadata(
+         *                 videoMetadata.getDeviceName(),
+         *                 videoMetadata.getSessionStart(),
+         *                 videoMetadata.getPart())
+         *         ) {
+         *             return ResponseEntity.ok().build();
+         *         }
+         */
+
 
         String url = cloudStoreService.uploadBlob(request.getFile(), videoMetadata.getName());
-        System.out.println("Processing: " + videoMetadata.getPart());
         VideoMetadata savedMetadata = metadataService.upload(videoMetadata, url);
         BackgroundJobRequest.enqueue(
             new InferenceRequest(
@@ -63,9 +68,3 @@ public class FileUploadController {
         return ResponseEntity.ok().build();
     }
 }
-
-@Getter @Setter
-class MiniFileUploadRequest{
-    private MultipartFile file;
-    private String metadata;
-};
