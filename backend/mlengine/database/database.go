@@ -2,9 +2,11 @@ package database
 
 import (
 	"fmt"
+	"log"
 	"os"
 
 	"github.com/jmoiron/sqlx"
+	_ "github.com/lib/pq"
 )
 
 // I absolutely plagarized tf outta this code
@@ -23,7 +25,7 @@ func OpenConnection() (*sqlx.DB, error) {
 	}
 
 	// Define database connection for PostgreSQL.
-	db, err := sqlx.Connect("pgx", postgresConnURL)
+	db, err := sqlx.Connect("postgres", postgresConnURL)
 	if err != nil {
 		return nil, fmt.Errorf("error, not connected to database, %w", err)
 	}
@@ -54,14 +56,15 @@ func connectionURLBuilder(n string) (string, error) {
 	case "postgres":
 		// URL for PostgreSQL connection.
 		url = fmt.Sprintf(
-			"host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
+			"host=%s port=%s user=%s dbname=%s sslmode=%s",
 			os.Getenv("DB_HOST"),
 			os.Getenv("DB_PORT"),
 			os.Getenv("DB_USER"),
-			os.Getenv("DB_PASSWORD"),
+			// os.Getenv("DB_PASSWORD"),
 			os.Getenv("DB_NAME"),
 			os.Getenv("DB_SSL_MODE"),
 		)
+		log.Println(url)
 	case "server":
 		// URL for server connection.
 		url = fmt.Sprintf(

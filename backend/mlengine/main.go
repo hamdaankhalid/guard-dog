@@ -11,9 +11,11 @@ import (
 	"github.com/joho/godotenv"
 )
 
-func setup() {
+func setup() error {
 	godotenv.Load(".env")
-	database.InitDb()
+	log.Println("Initializing DB")
+	err := database.InitDb()
+	return err
 }
 
 func handlerRequests() {
@@ -26,6 +28,10 @@ func handlerRequests() {
 }
 
 func main() {
-	setup()
+	err := setup()
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
 	handlerRequests()
 }

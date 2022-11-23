@@ -12,31 +12,19 @@ func InitDb() error {
 	if err != nil {
 		return err
 	}
-	createModelTable(conn)
-	createMlNotificationTable(conn)
+	createTables(conn)
 	return nil
 }
 
-func createModelTable(conn *sqlx.DB) {
-	query := `CREATE TABLE ` + ModelTable + ` ( 
-			column1 datatype,
-			column2 datatype,
-			column3 datatype,
-			columnN datatype,
-			PRIMARY KEY( one or more columns )
-	 );`
+func createTables(conn *sqlx.DB) {
+	var schema = `
+		CREATE TABLE model (
+				id integer
+		);
 
-	conn.MustExec(query)
-}
+		CREATE TABLE ml_notification (
+				id integer
+		)`
 
-func createMlNotificationTable(conn *sqlx.DB) {
-	query := `CREATE TABLE ` + MlNotificationTable + ` (
-		column1 datatype,
-		column2 datatype,
-		column3 datatype,
-		columnN datatype,
-		PRIMARY KEY( one or more columns )
- 	);`
-
-	conn.MustExec(query)
+	conn.MustExec(schema)
 }

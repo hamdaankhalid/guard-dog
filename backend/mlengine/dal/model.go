@@ -8,7 +8,7 @@ func UploadModel(model *Model) error {
 		return err
 	}
 
-	query := "NSERT INTO " + database.ModelTable + " VALUES ($1, $2, $3,)"
+	query := "INSERT INTO " + database.ModelTable + " VALUES ($1, $2, $3,)"
 
 	_, err = conn.Exec(query,
 		model.Id,
