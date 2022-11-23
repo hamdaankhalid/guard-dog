@@ -32,5 +32,5 @@ func NewAuth(handlerToWrap AuthenticatedHandler) *Auth {
 // TODO
 func getAuthenticatedUser(jwt string) (User, error) {
 	// decode jwt and return user
-	return User{}, nil
+	return User{Id: 1}, nil
 }

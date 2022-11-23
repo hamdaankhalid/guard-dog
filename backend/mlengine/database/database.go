@@ -2,7 +2,6 @@ package database
 
 import (
 	"fmt"
-	"log"
 	"os"
 
 	"github.com/jmoiron/sqlx"
@@ -64,7 +63,6 @@ func connectionURLBuilder(n string) (string, error) {
 			os.Getenv("DB_NAME"),
 			os.Getenv("DB_SSL_MODE"),
 		)
-		log.Println(url)
 	case "server":
 		// URL for server connection.
 		url = fmt.Sprintf(

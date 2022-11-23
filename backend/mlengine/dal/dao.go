@@ -1,13 +1,22 @@
 package dal
 
-import "mime/multipart"
+import (
+	"mime/multipart"
+
+	"github.com/google/uuid"
+)
 
 type Model struct {
-	ModelFile  multipart.File
-	Id, UserId int
+	ModelFile multipart.File `db:"model_file" json:"modelFile"`
+	Id        uuid.UUID      `db:"id" json:"id"`
+	UserId    int            `db:"user_id" json:"userId"`
 }
 
 type MlNotification struct {
-	DeviceName                   string
-	Id, SessionId, Part, ModelId int
+	DeviceName string    `db:"device_name" json:"deviceName"`
+	Id         uuid.UUID `db:"id" json:"id"`
+	SessionId  int       `db:"session_id" json:"sessionId"`
+	Part       int       `db:"part" json:"part"`
+	ModelId    uuid.UUID `db:"model_id" json:"modelId"`
+	UserId     int       `db:"user_id" json:"userId"`
 }
