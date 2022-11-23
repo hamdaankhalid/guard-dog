@@ -2,7 +2,9 @@ package com.guarddog.guard_dog_video_storage.config;
 
 import com.guarddog.guard_dog_video_storage.filter.CustomAuthenticationFilter;
 import com.guarddog.guard_dog_video_storage.filter.CustomAuthorizationFilter;
+import com.guarddog.guard_dog_video_storage.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -24,6 +26,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
+    @Autowired
+    private final UserRepository userRepository;
+
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
         auth.userDetailsService(userDetailsService).passwordEncoder(bCryptPasswordEncoder);
@@ -41,7 +46,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http.logout();
 
         http.authorizeRequests().anyRequest().authenticated();
-        http.addFilter(new CustomAuthenticationFilter(authenticationManagerBean()));
+        http.addFilter(new CustomAuthenticationFilter(authenticationManagerBean(), userRepository));
         http.addFilterBefore(new CustomAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class);
     }
 
