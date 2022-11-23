@@ -8,9 +8,9 @@ func UploadModel(model *Model) error {
 		return err
 	}
 
-	query := "INSERT INTO " + database.ModelTable + " VALUES ($1, $2, $3)"
-	b1 := []byte{}
-	_, err = model.ModelFile.Read(b1)
+	query := "INSERT INTO " + database.ModelTable + " VALUES ($1, $2, $3, $4)"
+	bytedata := []byte{}
+	_, err = model.ModelFile.Read(bytedata)
 
 	if err != nil {
 		return err
@@ -19,7 +19,8 @@ func UploadModel(model *Model) error {
 	_, err = conn.Exec(query,
 		model.Id,
 		model.UserId,
-		b1,
+		bytedata,
+		model.Filename,
 	)
 
 	return err

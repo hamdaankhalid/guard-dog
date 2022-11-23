@@ -21,7 +21,8 @@ func createTables(conn *sqlx.DB) {
 		CREATE TABLE model (
 				id UUID PRIMARY KEY,
 				user_id numeric,
-				model_file bytea
+				model_file bytea,
+				filename text
 		);
 
 		CREATE TABLE ml_notification (

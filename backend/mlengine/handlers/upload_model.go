@@ -33,7 +33,7 @@ func UploadModel(w http.ResponseWriter, r *http.Request, user middlewares.User) 
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	model := dal.Model{ModelFile: file, Id: id, UserId: user.Id}
+	model := dal.Model{ModelFile: file, Id: id, Filename: handler.Filename, UserId: user.Id}
 	err = dal.UploadModel(&model)
 	if err != nil {
 		log.Println(err)
