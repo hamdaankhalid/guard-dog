@@ -1,6 +1,11 @@
 package dal
 
-import "github.com/hamdaankhalid/mlengine/database"
+import (
+	"log"
+
+	"github.com/google/uuid"
+	"github.com/hamdaankhalid/mlengine/database"
+)
 
 func UploadModel(model *Model) error {
 	conn, err := database.OpenConnection()
@@ -9,8 +14,6 @@ func UploadModel(model *Model) error {
 	}
 
 	query := "INSERT INTO " + database.ModelTable + " VALUES ($1, $2, $3, $4)"
-	bytedata := []byte{}
-	_, err = model.ModelFile.Read(bytedata)
 
 	if err != nil {
 		return err
@@ -19,14 +22,17 @@ func UploadModel(model *Model) error {
 	_, err = conn.Exec(query,
 		model.Id,
 		model.UserId,
-		bytedata,
+		model.ModelFile,
 		model.Filename,
 	)
-
-	return err
+	if err != nil {
+		log.Println("Error in inserting model in db")
+		return err
+	}
+	return nil
 }
 
-func RetrieveModel(id int) (Model, error) {
+func RetrieveModel(id uuid.UUID) (Model, error) {
 	conn, err := database.OpenConnection()
 
 	if err != nil {
@@ -37,8 +43,11 @@ func RetrieveModel(id int) (Model, error) {
 
 	var model Model
 	err = conn.Get(&model, query, id)
-
-	return model, err
+	if err != nil {
+		log.Println("Error in getting model from db")
+		return Model{}, err
+	}
+	return model, nil
 }
 
 func RetrieveAllModels(userId int) ([]Model, error) {
@@ -51,7 +60,28 @@ func RetrieveAllModels(userId int) ([]Model, error) {
 	query := "SELECT * FROM " + database.ModelTable + " WHERE user_id=$1"
 
 	var models []Model
-	err = conn.Get(&models, query, userId)
+	err = conn.Select(&models, query, userId)
+	if err != nil {
+		log.Println("Error in getting models from db")
+		return []Model{}, err
+	}
+	return models, nil
+}
 
-	return models, err
+func DeleteModel(modelId uuid.UUID) error {
+	conn, err := database.OpenConnection()
+
+	if err != nil {
+		return err
+	}
+
+	query := "DELETE * FROM " + database.ModelTable + " WHERE id=$1"
+
+	var models []Model
+	err = conn.Select(&models, query, modelId)
+	if err != nil {
+		log.Println("Error in deleting model from db")
+		return err
+	}
+	return nil
 }

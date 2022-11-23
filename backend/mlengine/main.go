@@ -7,6 +7,7 @@ import (
 	"github.com/hamdaankhalid/mlengine/handlers"
 	"github.com/hamdaankhalid/mlengine/middlewares"
 
+	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 )
 
@@ -18,12 +19,17 @@ func setup() error {
 }
 
 func handlerRequests() {
-	http.HandleFunc("/health", handlers.Health)
+	router := mux.NewRouter()
 
-	http.Handle("/model", middlewares.NewAuth(handlers.UploadModel))
+	router.HandleFunc("/health", handlers.Health).Methods(http.MethodGet)
+
+	router.Handle("/model", middlewares.NewAuth(handlers.UploadModel)).Methods(http.MethodPost)
+	router.Handle("/model", middlewares.NewAuth(handlers.GetModels)).Methods(http.MethodGet)
+	router.Handle("/model/{modelId}", middlewares.NewAuth(handlers.GetModel)).Methods(http.MethodGet)
+	router.Handle("/model/{modelId}", middlewares.NewAuth(handlers.GetModel)).Methods(http.MethodDelete)
 
 	log.Println("Booting up ML Engine Up")
-	log.Fatal(http.ListenAndServe(":6969", nil))
+	log.Fatal(http.ListenAndServe(":6969", router))
 }
 
 func main() {

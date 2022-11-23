@@ -10,10 +10,6 @@ import (
 )
 
 func UploadModel(w http.ResponseWriter, r *http.Request, user middlewares.User) {
-	if r.Method != "POST" {
-		w.WriteHeader(http.StatusMethodNotAllowed)
-		return
-	}
 	// upload of 10 MB files.
 	r.ParseMultipartForm(10 << 20)
 	file, handler, err := r.FormFile("model")
@@ -33,7 +29,16 @@ func UploadModel(w http.ResponseWriter, r *http.Request, user middlewares.User) 
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	model := dal.Model{ModelFile: file, Id: id, Filename: handler.Filename, UserId: user.Id}
+	bytes := []byte{}
+
+	_, err = file.Read(bytes)
+	if err != nil {
+		log.Println("Read Error", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	model := dal.Model{ModelFile: bytes, Id: id, Filename: handler.Filename, UserId: user.Id}
 	err = dal.UploadModel(&model)
 	if err != nil {
 		log.Println(err)

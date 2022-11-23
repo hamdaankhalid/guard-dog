@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"encoding/json"
 	"log"
 	"net/http"
 
@@ -10,7 +11,7 @@ import (
 	"github.com/hamdaankhalid/mlengine/middlewares"
 )
 
-func DeleteModel(w http.ResponseWriter, r *http.Request, user middlewares.User) {
+func GetModel(w http.ResponseWriter, r *http.Request, user middlewares.User) {
 	vars := mux.Vars(r)
 	userId := user.Id
 	modelId, err := uuid.Parse(vars["modelId"])
@@ -32,13 +33,12 @@ func DeleteModel(w http.ResponseWriter, r *http.Request, user middlewares.User) 
 		return
 	}
 
-	err = dal.DeleteModel(modelId)
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+	jsonResp, err := json.Marshal(model)
 	if err != nil {
-		log.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-
-	w.WriteHeader(http.StatusOK)
-	w.Header().Set("Content-Type", "application/json")
+	w.Write(jsonResp)
 }
