@@ -29,7 +29,7 @@ func OpenConnection() (*sqlx.DB, error) {
 		return nil, fmt.Errorf("error, not connected to database, %w", err)
 	}
 
-	// Set database connection settings:
+	//  - Set database connection settings:
 	// 	- SetMaxOpenConns: the default is 0 (unlimited)
 	// 	- SetMaxIdleConns: defaultMaxIdleConns = 2
 	// 	- SetConnMaxLifetime: 0, connections are reused forever

@@ -2,7 +2,7 @@ package database
 
 import "github.com/jmoiron/sqlx"
 
-var (
+const (
 	ModelTable          = "model"
 	MlNotificationTable = "ml_notification"
 )
