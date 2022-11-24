@@ -3,7 +3,6 @@ package main
 import (
 	"log"
 	"net/http"
-	"sync"
 
 	"github.com/hamdaankhalid/mlengine/database"
 	"github.com/hamdaankhalid/mlengine/handlers"
@@ -29,26 +28,26 @@ func handleRequests() {
 	router.Handle("/model", middlewares.NewAuth(handlers.UploadModel)).Methods(http.MethodPost)
 	router.Handle("/model", middlewares.NewAuth(handlers.GetModels)).Methods(http.MethodGet)
 	router.Handle("/model/{modelId}", middlewares.NewAuth(handlers.GetModel)).Methods(http.MethodGet)
-	router.Handle("/model/{modelId}", middlewares.NewAuth(handlers.GetModel)).Methods(http.MethodDelete)
+	router.Handle("/model/{modelId}", middlewares.NewAuth(handlers.DeleteModel)).Methods(http.MethodDelete)
+	router.Handle("/ml-notifications", middlewares.NewAuth(handlers.GetMlNotification)).Methods(http.MethodGet)
 
 	log.Println("Booting up ML Engine Up")
 	log.Fatal(http.ListenAndServe(":6969", router))
 }
 
 func kickOffServer() {
-	var wg sync.WaitGroup
+
 	listener := workers.NewListener()
-	wg.Add(1)
+
 	go func() {
-		defer wg.Done()
 		err := listener.SubscribeAndConsume()
 		if err != nil {
-			log.Fatal(err)
+			log.Fatalf("List and Serve Exited: %s", err)
 		}
 	}()
 
+	// Blocking call so our above kicked off go routine will not exit early :)
 	handleRequests()
-	wg.Wait()
 }
 
 func main() {

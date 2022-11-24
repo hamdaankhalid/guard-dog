@@ -30,9 +30,12 @@ func NewListener() *Listener {
 
 func initConsumer() *kafka.Consumer {
 	// Create Consumer instance
+	kafkaServers := os.Getenv("KAFKA_SERVERS")
+	kafkaGroupId := os.Getenv("KAFKA_GROUP_ID")
+
 	c, err := kafka.NewConsumer(&kafka.ConfigMap{
-		"bootstrap.servers": "host1:9092,host2:9092",
-		"group.id":          "foo",
+		"bootstrap.servers": kafkaServers,
+		"group.id":          kafkaGroupId,
 		"auto.offset.reset": "smallest"})
 	if err != nil {
 		log.Fatalf("Failed to create consumer: %s", err)

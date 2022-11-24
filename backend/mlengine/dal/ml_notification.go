@@ -15,7 +15,7 @@ func UploadMlNotification(mlNotification *MlNotification) error {
 	return err
 }
 
-func RetrieveMlNotifications(userId int) ([]MlNotification, error) {
+func RetrieveAllMlNotifications(userId int) ([]MlNotification, error) {
 	conn, err := database.OpenConnection()
 
 	if err != nil {

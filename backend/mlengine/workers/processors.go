@@ -1,6 +1,10 @@
 package workers
 
-import "gopkg.in/confluentinc/confluent-kafka-go.v1/kafka"
+import (
+	"fmt"
+
+	"gopkg.in/confluentinc/confluent-kafka-go.v1/kafka"
+)
 
 type KafkaMsgProcessor func(*kafka.Message)
 
@@ -13,7 +17,7 @@ func RouteTask(key string) KafkaMsgProcessor {
 	}
 }
 
-// TODO
-func RunInference(_ *kafka.Message) {
-
+// TODO:
+func RunInference(msg *kafka.Message) {
+	fmt.Println(msg)
 }
