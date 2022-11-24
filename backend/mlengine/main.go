@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/hamdaankhalid/mlengine/database"
 	"github.com/hamdaankhalid/mlengine/handlers"
 	"github.com/hamdaankhalid/mlengine/middlewares"
 
@@ -14,8 +15,8 @@ import (
 func setup() error {
 	godotenv.Load(".env")
 	log.Println("Initializing DB")
-	// err := database.InitDb()
-	return nil
+	err := database.InitDb(false)
+	return err
 }
 
 func handlerRequests() {

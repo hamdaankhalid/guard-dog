@@ -7,11 +7,15 @@ var (
 	MlNotificationTable = "ml_notification"
 )
 
-func InitDb() error {
+func InitDb(recreate bool) error {
 	conn, err := OpenConnection()
 	if err != nil {
 		return err
 	}
+	if recreate {
+		dropTables(conn)
+	}
+
 	createTables(conn)
 	return nil
 }
@@ -37,6 +41,15 @@ func createTables(conn *sqlx.DB) {
     	  REFERENCES model(id)
     	  ON DELETE CASCADE
 		)`
+
+	conn.MustExec(schema)
+}
+
+func dropTables(conn *sqlx.DB) {
+	schema := `
+		DROP TABLE model;
+		DROP TABLE ml_notification;
+	`
 
 	conn.MustExec(schema)
 }
