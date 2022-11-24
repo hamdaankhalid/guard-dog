@@ -21,14 +21,17 @@ type Listener struct {
 	topics   []string
 }
 
-func NewListener() *Listener {
-	topics := []string{"video_upload"}
+func NewListener() (*Listener, error) {
+	topics := []string{"video-upload"}
 
-	consumer := initConsumer()
-	return &Listener{consumer: consumer, topics: topics}
+	consumer, err := initConsumer()
+	if err != nil {
+		return nil, err
+	}
+	return &Listener{consumer: consumer, topics: topics}, nil
 }
 
-func initConsumer() *kafka.Consumer {
+func initConsumer() (*kafka.Consumer, error) {
 	// Create Consumer instance
 	kafkaServers := os.Getenv("KAFKA_SERVERS")
 	kafkaGroupId := os.Getenv("KAFKA_GROUP_ID")
@@ -39,8 +42,9 @@ func initConsumer() *kafka.Consumer {
 		"auto.offset.reset": "smallest"})
 	if err != nil {
 		log.Fatalf("Failed to create consumer: %s", err)
+		return nil, err
 	}
-	return c
+	return c, nil
 }
 
 func (l *Listener) SubscribeAndConsume() error {
@@ -54,6 +58,7 @@ func (l *Listener) SubscribeAndConsume() error {
 	sigchan := make(chan os.Signal, 1)
 	signal.Notify(sigchan, syscall.SIGINT, syscall.SIGTERM)
 	run := true
+	fmt.Println("Listening")
 	for run {
 		select {
 		case sig := <-sigchan:
@@ -66,6 +71,7 @@ func (l *Listener) SubscribeAndConsume() error {
 				continue
 			}
 			recordKey := string(msg.Key)
+			fmt.Println(recordKey)
 			handler := RouteTask(recordKey)
 			go handler(msg)
 		}

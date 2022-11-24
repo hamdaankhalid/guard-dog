@@ -31,23 +31,28 @@ func handleRequests() {
 	router.Handle("/model/{modelId}", middlewares.NewAuth(handlers.DeleteModel)).Methods(http.MethodDelete)
 	router.Handle("/ml-notifications", middlewares.NewAuth(handlers.GetMlNotification)).Methods(http.MethodGet)
 
-	log.Println("Booting up ML Engine Up")
+	log.Println("Listening And Serving ML Engine Up")
 	log.Fatal(http.ListenAndServe(":6969", router))
 }
 
-func kickOffServer() {
+func kickOffServer() error {
 
-	listener := workers.NewListener()
+	listener, err := workers.NewListener()
+	if err != nil {
+		return err
+	}
 
 	go func() {
 		err := listener.SubscribeAndConsume()
 		if err != nil {
-			log.Fatalf("List and Serve Exited: %s", err)
+			log.Fatalf("Listen and Serve Exited: %s", err)
+			return
 		}
 	}()
 
 	// Blocking call so our above kicked off go routine will not exit early :)
 	handleRequests()
+	return nil
 }
 
 func main() {
@@ -56,5 +61,8 @@ func main() {
 		log.Fatal(err)
 		return
 	}
-	kickOffServer()
+	err = kickOffServer()
+	if err != nil {
+		log.Fatal(err)
+	}
 }

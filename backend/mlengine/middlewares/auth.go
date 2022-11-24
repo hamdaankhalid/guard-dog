@@ -44,7 +44,7 @@ func getAuthenticatedUser(tokenStr string) (User, error) {
 	claims := jwt.MapClaims{}
 	hmacSecret := []byte(secret)
 	token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
-		// check token signing method etc
+		// TODO: check token signing method etc
 		return hmacSecret, nil
 	})
 

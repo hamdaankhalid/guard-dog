@@ -14,9 +14,9 @@ func InitDb(recreate bool) error {
 	}
 	if recreate {
 		dropTables(conn)
+		createTables(conn)
 	}
 
-	createTables(conn)
 	return nil
 }
 
