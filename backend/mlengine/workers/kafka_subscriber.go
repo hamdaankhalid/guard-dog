@@ -71,6 +71,7 @@ func (l *Listener) SubscribeAndConsume() error {
 				continue
 			}
 			recordKey := string(msg.Key)
+			fmt.Println(msg.TopicPartition.Topic)
 			fmt.Println(recordKey)
 			handler := RouteTask(recordKey)
 			go handler(msg)
