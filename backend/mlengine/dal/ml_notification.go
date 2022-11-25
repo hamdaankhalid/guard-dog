@@ -1,6 +1,9 @@
 package dal
 
-import "github.com/hamdaankhalid/mlengine/database"
+import (
+	"github.com/google/uuid"
+	"github.com/hamdaankhalid/mlengine/database"
+)
 
 func UploadMlNotification(mlNotification *MlNotification) error {
 	conn, err := database.OpenConnection()
@@ -27,4 +30,18 @@ func RetrieveAllMlNotifications(userId int) ([]MlNotification, error) {
 	err = conn.Get(&notificatons, query, userId)
 
 	return notificatons, err
+}
+
+func RetrieveMlNotification(notificationId uuid.UUID) (MlNotification, error) {
+	conn, err := database.OpenConnection()
+
+	if err != nil {
+		return MlNotification{}, err
+	}
+
+	var notificaton MlNotification
+	query := "SELECT * FROM " + database.MlNotificationTable + " WHERE id=$1"
+	err = conn.Get(&notificaton, query, notificationId)
+
+	return notificaton, err
 }

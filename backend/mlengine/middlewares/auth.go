@@ -2,7 +2,6 @@ package middlewares
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 	"os"
 	"strings"
@@ -20,10 +19,6 @@ type Auth struct {
 	handler AuthenticatedHandler
 }
 
-/** Incoming requests are attached with user details
-TEST TOKEN:
-eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJoa2hhbGlkQG1pY3Jvc29mdC5jb20iLCJ1c2VyX2lkIjoxLCJyb2xlcyI6WyJVU0VSIl0sImlzcyI6Imh0dHA6Ly9sb2NhbGhvc3Q6ODA4MC9hcGkvdmlkZW9fc3RvcmFnZS9sb2dpbiIsImV4cCI6MTY2OTE4NDgzM30.KywMi3iOyqdjxEQrz5wQaL0eg7viX2VEVnRkYjBOE8M
-**/
 func (auth *Auth) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	user, err := getAuthenticatedUser(strings.Split(r.Header.Get("Authorization"), "Bearer ")[1])
 	if err != nil {
@@ -49,7 +44,6 @@ func getAuthenticatedUser(tokenStr string) (User, error) {
 	})
 
 	if err != nil {
-		fmt.Println(err)
 		return User{}, err
 	}
 

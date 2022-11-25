@@ -1,7 +1,6 @@
 package workers
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"os/signal"
@@ -32,7 +31,6 @@ func NewListener() (*Listener, error) {
 }
 
 func initConsumer() (*kafka.Consumer, error) {
-	// Create Consumer instance
 	kafkaServers := os.Getenv("KAFKA_SERVERS")
 	kafkaGroupId := os.Getenv("KAFKA_GROUP_ID")
 
@@ -48,35 +46,32 @@ func initConsumer() (*kafka.Consumer, error) {
 }
 
 func (l *Listener) SubscribeAndConsume() error {
-
-	err := l.consumer.SubscribeTopics(l.topics, nil)
 	defer l.consumer.Close()
-
+	err := l.consumer.SubscribeTopics(l.topics, nil)
 	if err != nil {
 		return err
 	}
+
+	// Graceful exit signalling
 	sigchan := make(chan os.Signal, 1)
 	signal.Notify(sigchan, syscall.SIGINT, syscall.SIGTERM)
+
 	run := true
-	fmt.Println("Listening")
 	for run {
 		select {
-		case sig := <-sigchan:
-			fmt.Printf("Caught signal %v: terminating\n", sig)
+		case _ = <-sigchan:
+			// Terminate
 			run = false
+			os.Exit(0)
 		default:
 			msg, err := l.consumer.ReadMessage(100 * time.Millisecond)
 			if err != nil {
 				// Errors are informational and automatically handled by the consumer
 				continue
 			}
-			recordKey := string(msg.Key)
-			fmt.Println(msg.TopicPartition.Topic)
-			fmt.Println(recordKey)
-			handler := RouteTask(recordKey)
+			handler := RouteTask(msg.TopicPartition.Topic)
 			go handler(msg)
 		}
 	}
-
 	return nil
 }

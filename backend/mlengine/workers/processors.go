@@ -1,16 +1,26 @@
 package workers
 
 import (
+	"encoding/json"
 	"fmt"
+	"log"
 
 	"gopkg.in/confluentinc/confluent-kafka-go.v1/kafka"
 )
 
+type VideoUploadEvent struct {
+	Url        string `json:"url"`
+	UserId     int    `json:"user_id"`
+	DeviceName string `json:"deviceName"`
+	SessionId  int    `json:"sessionId"`
+	Part       int    `json:"part"`
+}
+
 type KafkaMsgProcessor func(*kafka.Message)
 
-func RouteTask(key string) KafkaMsgProcessor {
-	switch key {
-	case "video_upload":
+func RouteTask(topic *string) KafkaMsgProcessor {
+	switch *topic {
+	case "video-upload":
 		return RunInference
 	default:
 		return func(_ *kafka.Message) {}
@@ -19,5 +29,11 @@ func RouteTask(key string) KafkaMsgProcessor {
 
 // TODO:
 func RunInference(msg *kafka.Message) {
-	fmt.Println(msg)
+	var event VideoUploadEvent
+	err := json.Unmarshal(msg.Value, &event)
+	if err != nil {
+		log.Println(err)
+	}
+	fmt.Println(event.UserId)
+	fmt.Println(event.Url)
 }

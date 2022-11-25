@@ -3,13 +3,11 @@ package main
 import (
 	"log"
 	"net/http"
+	"sync"
 
 	"github.com/hamdaankhalid/mlengine/database"
-	"github.com/hamdaankhalid/mlengine/handlers"
-	"github.com/hamdaankhalid/mlengine/middlewares"
 	"github.com/hamdaankhalid/mlengine/workers"
 
-	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 )
 
@@ -20,39 +18,40 @@ func setup() error {
 	return err
 }
 
-func handleRequests() {
-	router := mux.NewRouter()
-
-	router.HandleFunc("/health", handlers.Health).Methods(http.MethodGet)
-
-	router.Handle("/model", middlewares.NewAuth(handlers.UploadModel)).Methods(http.MethodPost)
-	router.Handle("/model", middlewares.NewAuth(handlers.GetModels)).Methods(http.MethodGet)
-	router.Handle("/model/{modelId}", middlewares.NewAuth(handlers.GetModel)).Methods(http.MethodGet)
-	router.Handle("/model/{modelId}", middlewares.NewAuth(handlers.DeleteModel)).Methods(http.MethodDelete)
-	router.Handle("/ml-notifications", middlewares.NewAuth(handlers.GetMlNotification)).Methods(http.MethodGet)
-
-	log.Println("Listening And Serving ML Engine Up")
-	log.Fatal(http.ListenAndServe(":6969", router))
-}
-
-func kickOffServer() error {
-
-	listener, err := workers.NewListener()
-	if err != nil {
-		return err
-	}
-
+func createAndStartServer(wg *sync.WaitGroup) *http.Server {
+	server := &http.Server{Addr: ":6969", Handler: GetRouter()}
 	go func() {
-		err := listener.SubscribeAndConsume()
-		if err != nil {
-			log.Fatalf("Listen and Serve Exited: %s", err)
+		// let main know we are done cleaning up
+		defer wg.Done()
+		// always returns error. ErrServerClosed on graceful close
+		// Blocking call so our above kicked off go routine will not exit early :)
+		if err := server.ListenAndServe(); err != http.ErrServerClosed {
+			// unexpected error. port in use?
+			// log.Fatalln(err)
 			return
 		}
 	}()
+	log.Println("Listening And Serving ML Engine Up")
+	return server
+}
 
-	// Blocking call so our above kicked off go routine will not exit early :)
-	handleRequests()
-	return nil
+func start(wg *sync.WaitGroup) (*http.Server, error) {
+	// Start Event Consumer async
+	listener, err := workers.NewListener()
+	if err != nil {
+		return nil, err
+	}
+	go func() {
+		err := listener.SubscribeAndConsume()
+		if err != nil {
+			log.Fatalf("Event Consumption Exited With Error: %s", err)
+		}
+	}()
+
+	//Start Http server async
+	server := createAndStartServer(wg)
+
+	return server, nil
 }
 
 func main() {
@@ -61,7 +60,13 @@ func main() {
 		log.Fatal(err)
 		return
 	}
-	err = kickOffServer()
+
+	// Use waitgroups for graceful exit on http server
+	var wg sync.WaitGroup
+	wg.Add(1)
+	_, err = start(&wg)
+	wg.Wait()
+
 	if err != nil {
 		log.Fatal(err)
 	}
