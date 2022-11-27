@@ -105,7 +105,6 @@ func (q *Queue) process(taskName string) {
 	for run {
 		select {
 		case _ = <-sigchan:
-			log.Println("Exiting async processing loop")
 			run = false
 		default:
 			switch taskName {

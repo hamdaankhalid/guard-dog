@@ -62,8 +62,6 @@ func (l *Listener) SubscribeAndConsume() error {
 	for run {
 		select {
 		case _ = <-sigchan:
-			// Terminate
-			log.Println("exiting kafka event subscriptions")
 			run = false
 		default:
 			msg, err := l.consumer.ReadMessage(100 * time.Millisecond)

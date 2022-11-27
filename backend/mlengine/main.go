@@ -3,7 +3,10 @@ package main
 import (
 	"log"
 	"net/http"
+	"os"
+	"os/signal"
 	"sync"
+	"syscall"
 
 	"github.com/hamdaankhalid/mlengine/database"
 	"github.com/hamdaankhalid/mlengine/handlers"
@@ -20,27 +23,8 @@ func setup() error {
 	return err
 }
 
-func createAndStartServer(processingQueue *processingqueue.Queue) *http.Server {
-	var wg *sync.WaitGroup
-	router := handlers.NewRouter(processingQueue)
-	server := &http.Server{Addr: ":6969", Handler: router.Routing}
-	go func() {
-		// let main know we are done cleaning up
-		defer wg.Done()
-		// always returns error. ErrServerClosed on graceful close
-		// Blocking call so our above kicked off go routine will not exit early :)
-		if err := server.ListenAndServe(); err != http.ErrServerClosed {
-			// unexpected error. port in use?
-			// log.Fatalln(err)
-			return
-		}
-	}()
-	log.Println("Listening And Serving ML Engine Up")
-	return server
-}
-
 func start(wg *sync.WaitGroup) (*http.Server, error) {
-
+	// Start Processing Queue asyn
 	processingQueue := processingqueue.NewQueue()
 
 	wg.Add(1)
@@ -66,8 +50,21 @@ func start(wg *sync.WaitGroup) (*http.Server, error) {
 		log.Println("Kafka event processing shutdown on main thread")
 	}(wg)
 
-	//Start Http server async
-	server := createAndStartServer(processingQueue)
+	// Start Http server async
+	router := handlers.NewRouter(processingQueue)
+	server := &http.Server{Addr: ":6969", Handler: router.Routing}
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		if err := server.ListenAndServe(); err != http.ErrServerClosed {
+			log.Fatalln(err)
+			return
+		}
+		log.Println("Http Web-Server Shutdown")
+	}()
+
+	log.Println("Listening And Serving ML Engine Up")
+
 	return server, nil
 }
 
@@ -78,13 +75,26 @@ func main() {
 		return
 	}
 
-	// Use waitgroups for graceful exit on http server
 	var wg sync.WaitGroup
 
-	_, err = start(&wg)
-	wg.Wait()
-
+	server, err := start(&wg)
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	wg.Add(1)
+	go func(server *http.Server, wg *sync.WaitGroup) {
+		defer wg.Done()
+		sigchan := make(chan os.Signal, 1)
+		signal.Notify(sigchan, syscall.SIGINT, syscall.SIGTERM)
+		for true {
+			select {
+			case _ = <-sigchan:
+				server.Shutdown(nil)
+				return
+			}
+		}
+	}(server, &wg)
+
+	wg.Wait()
 }
