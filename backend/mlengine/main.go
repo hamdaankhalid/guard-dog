@@ -8,6 +8,7 @@ import (
 	"sync"
 	"syscall"
 
+	"github.com/hamdaankhalid/mlengine/dal"
 	"github.com/hamdaankhalid/mlengine/database"
 	"github.com/hamdaankhalid/mlengine/handlers"
 	"github.com/hamdaankhalid/mlengine/kafkaworkers"
@@ -51,11 +52,11 @@ func start(wg *sync.WaitGroup) (*http.Server, error) {
 	}(wg)
 
 	// Start Http server async
-	router, err := handlers.NewRouter(processingQueue)
+	conn, err := database.OpenConnection()
 	if err != nil {
 		return nil, err
 	}
-
+	router := handlers.NewRouter(processingQueue, &dal.Queries{Conn: conn})
 	server := &http.Server{Addr: ":6969", Handler: router.Routing}
 	wg.Add(1)
 	go func() {

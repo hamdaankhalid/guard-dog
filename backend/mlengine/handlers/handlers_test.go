@@ -13,6 +13,7 @@ import (
 
 func mockedDependencyRouter() (*handlers.Router, error) {
 	testQueue := &processingqueue.MockQueue{InnerState: []string{}}
+	// TODO
 	router, err := handlers.NewRouter(testQueue)
 	return router, err
 }

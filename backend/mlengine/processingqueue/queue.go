@@ -81,7 +81,6 @@ func (q *Queue) BeginProcessing() {
 			}
 		}
 	}()
-
 	wg.Wait()
 }
 
@@ -108,6 +107,12 @@ func (q *Queue) process(taskName string) {
 	sigchan := make(chan os.Signal, 1)
 	signal.Notify(sigchan, syscall.SIGINT, syscall.SIGTERM)
 
+	conn, err := database.OpenConnection()
+	if err != nil {
+		log.Println("Task Not Queued Because No DB Connection:", taskName)
+		return
+	}
+
 	run := true
 	for run {
 		select {
@@ -120,24 +125,12 @@ func (q *Queue) process(taskName string) {
 				if uploadModelReq == nil {
 					continue
 				}
-
-				conn, err := database.OpenConnection()
-				if err != nil {
-					log.Println("Task Not Queued Because No DB Connection:", taskName)
-					return
-				}
 				queries := &dal.Queries{Conn: conn}
-
 				uploadModelTask(uploadModelReq, queries)
 			case InferenceOnModelTaskName:
 				inferenceOnModelTask := <-q.inferenceOnModelTasks
 				if inferenceOnModelTask == nil {
 					continue
-				}
-				conn, err := database.OpenConnection()
-				if err != nil {
-					log.Println("Task Not Queued Because No DB Connection:", taskName)
-					return
 				}
 				queries := &dal.Queries{Conn: conn}
 				parallelModelInferenceTask(inferenceOnModelTask, queries)

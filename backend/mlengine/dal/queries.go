@@ -8,7 +8,15 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-
+type IQueries interface {
+	UploadMlNotification(mlNotification *MlNotification) error
+	RetrieveAllMlNotifications(userId int) ([]MlNotification, error)
+	RetrieveMlNotification(notificationId uuid.UUID) (MlNotification, error)
+	UploadModel(model *Model) error
+	RetrieveModel(id uuid.UUID) (Model, error)
+	RetrieveAllModels(userId int) ([]ModelWithoutData, error)
+	DeleteModel(modelId uuid.UUID) error
+}
 
 type Queries struct {
 	Conn *sqlx.DB

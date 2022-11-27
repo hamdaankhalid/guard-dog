@@ -5,7 +5,6 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/hamdaankhalid/mlengine/dal"
-	"github.com/hamdaankhalid/mlengine/database"
 	"github.com/hamdaankhalid/mlengine/middlewares"
 	"github.com/hamdaankhalid/mlengine/processingqueue"
 )
@@ -13,17 +12,12 @@ import (
 type Router struct {
 	processingQueue processingqueue.IQueue
 	Routing         *mux.Router
-	Queries         *dal.Queries
+	Queries         dal.IQueries
 }
 
-func NewRouter(processingQueue processingqueue.IQueue) (*Router, error) {
-	conn, err := database.OpenConnection()
-	if err != nil {
-		return nil, err
-	}
-
+func NewRouter(processingQueue processingqueue.IQueue, queries dal.IQueries) *Router {
 	router := mux.NewRouter()
-	res := &Router{processingQueue: processingQueue, Routing: router, Queries: &dal.Queries{Conn: conn}}
+	res := &Router{processingQueue: processingQueue, Routing: router, Queries: queries}
 
 	router.HandleFunc("/health", res.Health).Methods(http.MethodGet)
 	router.Handle("/model", middlewares.NewAuth(res.UploadModel)).Methods(http.MethodPost)
@@ -33,5 +27,5 @@ func NewRouter(processingQueue processingqueue.IQueue) (*Router, error) {
 	router.Handle("/ml-notification", middlewares.NewAuth(res.GetMlNotifications)).Methods(http.MethodGet)
 	router.Handle("/ml-notification/{mlNotificationId}", middlewares.NewAuth(res.GetMlNotification)).Methods(http.MethodGet)
 
-	return res, nil
+	return res
 }
