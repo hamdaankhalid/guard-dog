@@ -74,14 +74,11 @@ func main() {
 		log.Fatal(err)
 		return
 	}
-
 	var wg sync.WaitGroup
-
 	server, err := start(&wg)
 	if err != nil {
 		log.Fatal(err)
 	}
-
 	wg.Add(1)
 	go func(server *http.Server, wg *sync.WaitGroup) {
 		defer wg.Done()
@@ -95,6 +92,5 @@ func main() {
 			}
 		}
 	}(server, &wg)
-
 	wg.Wait()
 }
