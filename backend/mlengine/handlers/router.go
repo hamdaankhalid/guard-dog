@@ -9,11 +9,11 @@ import (
 )
 
 type Router struct {
-	processingQueue *processingqueue.Queue
+	processingQueue processingqueue.IQueue
 	Routing         *mux.Router
 }
 
-func NewRouter(processingQueue *processingqueue.Queue) *Router {
+func NewRouter(processingQueue processingqueue.IQueue) *Router {
 	router := mux.NewRouter()
 	res := &Router{processingQueue: processingQueue, Routing: router}
 

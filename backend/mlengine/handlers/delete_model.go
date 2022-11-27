@@ -13,7 +13,13 @@ import (
 func (router *Router) DeleteModel(w http.ResponseWriter, r *http.Request, user middlewares.User) {
 	vars := mux.Vars(r)
 	userId := user.Id
-	modelId, err := uuid.Parse(vars["modelId"])
+	modelUuid, ok := vars["modelId"]
+	if !ok {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	modelId, err := uuid.Parse(modelUuid)
 	if err != nil {
 		log.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)

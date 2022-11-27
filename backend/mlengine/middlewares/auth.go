@@ -16,14 +16,12 @@ type User struct {
 }
 
 type Auth struct {
-	handler    AuthenticatedHandler
-	doMockAuth bool
-	secret     string
+	handler AuthenticatedHandler
+	secret  string
 }
 
 func NewAuth(handlerToWrap AuthenticatedHandler) *Auth {
-	mockAuth := os.Getenv("MOCK_AUTH")
-	return &Auth{handler: handlerToWrap, doMockAuth: mockAuth == "true", secret: os.Getenv("JWT_SECRET")}
+	return &Auth{handler: handlerToWrap, secret: os.Getenv("JWT_SECRET")}
 }
 
 func (auth *Auth) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -37,9 +35,9 @@ func (auth *Auth) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (auth *Auth) getAuthenticatedUser(tokenStr string) (User, error) {
-	if auth.doMockAuth {
-		return User{Id: 1}, nil
-	}
+	// if auth.secret == "" {
+	// 	return User{Id: 1}, nil
+	// }
 
 	// decode jwt and return user
 	claims := jwt.MapClaims{}

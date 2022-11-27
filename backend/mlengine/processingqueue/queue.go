@@ -29,6 +29,11 @@ type UploadModelReq struct {
 	UserId  int
 }
 
+type IQueue interface {
+	BeginProcessing()
+	Enqueue(taskName string, task interface{})
+}
+
 type Queue struct {
 	uploadModelTasks      chan *UploadModelReq
 	inferenceOnModelTasks chan *kafka.Message

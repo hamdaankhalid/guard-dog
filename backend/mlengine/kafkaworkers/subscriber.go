@@ -19,10 +19,10 @@ import (
 type Listener struct {
 	consumer        *kafka.Consumer
 	topics          []string
-	processingQueue *processingqueue.Queue
+	processingQueue processingqueue.IQueue
 }
 
-func NewListener(processingQueue *processingqueue.Queue) (*Listener, error) {
+func NewListener(processingQueue processingqueue.IQueue) (*Listener, error) {
 	topics := []string{"video-upload"}
 
 	consumer, err := initConsumer()

@@ -23,6 +23,7 @@ func (router *Router) UploadModel(w http.ResponseWriter, r *http.Request, user m
 	log.Printf("MIME Header: %+v\n", handler.Header)
 
 	router.processingQueue.Enqueue(processingqueue.UploadModelTaskName, &processingqueue.UploadModelReq{File: &file, Handler: handler, UserId: user.Id})
+	
 
 	w.WriteHeader(http.StatusCreated)
 }
