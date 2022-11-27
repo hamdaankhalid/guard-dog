@@ -13,9 +13,9 @@ func uploadModelTask(uploadModelReq *UploadModelReq) {
 	uuid, err := uuid.NewUUID()
 	if err != nil {
 		log.Println(err)
-
 		return
 	}
+
 	bytes := bytes.NewBuffer(nil)
 	n, err := io.Copy(bytes, *uploadModelReq.File)
 	if err != nil || n == 0 {

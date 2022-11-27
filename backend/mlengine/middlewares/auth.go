@@ -1,8 +1,12 @@
 package middlewares
 
 import (
+	"errors"
 	"net/http"
+	"os"
 	"strings"
+
+	"github.com/golang-jwt/jwt"
 )
 
 type AuthenticatedHandler func(http.ResponseWriter, *http.Request, User)
@@ -12,11 +16,18 @@ type User struct {
 }
 
 type Auth struct {
-	handler AuthenticatedHandler
+	handler    AuthenticatedHandler
+	doMockAuth bool
+	secret     string
+}
+
+func NewAuth(handlerToWrap AuthenticatedHandler) *Auth {
+	mockAuth := os.Getenv("MOCK_AUTH")
+	return &Auth{handler: handlerToWrap, doMockAuth: mockAuth == "true", secret: os.Getenv("JWT_SECRET")}
 }
 
 func (auth *Auth) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	user, err := getAuthenticatedUser(strings.Split(r.Header.Get("Authorization"), "Bearer ")[1])
+	user, err := auth.getAuthenticatedUser(strings.Split(r.Header.Get("Authorization"), "Bearer ")[1])
 	if err != nil {
 		w.WriteHeader(http.StatusUnauthorized)
 		return
@@ -25,30 +36,29 @@ func (auth *Auth) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	auth.handler(w, r, user)
 }
 
-func NewAuth(handlerToWrap AuthenticatedHandler) *Auth {
-	return &Auth{handlerToWrap}
-}
+func (auth *Auth) getAuthenticatedUser(tokenStr string) (User, error) {
+	if auth.doMockAuth {
+		return User{Id: 1}, nil
+	}
 
-func getAuthenticatedUser(tokenStr string) (User, error) {
 	// decode jwt and return user
-	// secret := os.Getenv("JWT_SECRET")
-	// claims := jwt.MapClaims{}
-	// hmacSecret := []byte(secret)
-	// token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
-	// 	// TODO: check token signing method etc
-	// 	return hmacSecret, nil
-	// })
+	claims := jwt.MapClaims{}
+	hmacSecret := []byte(auth.secret)
+	token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
+		// TODO: check token signing method etc
+		return hmacSecret, nil
+	})
 
-	// if err != nil {
-	// 	return User{}, err
-	// }
+	if err != nil {
+		return User{}, err
+	}
 
-	// claims, ok := token.Claims.(jwt.MapClaims)
-	// if ok && token.Valid {
-	// 	var userId = int(claims["user_id"].(float64))
-	// 	return User{Id: userId}, nil
-	// }
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if ok && token.Valid {
+		var userId = int(claims["user_id"].(float64))
+		return User{Id: userId}, nil
+	}
 
-	// return User{}, errors.New("Invalid JWT Token")
-	return User{Id: 1}, nil
+	return User{}, errors.New("Invalid JWT Token")
+
 }
