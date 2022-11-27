@@ -18,8 +18,8 @@ type ModelWithoutData struct {
 }
 
 type MlNotification struct {
-	DeviceName string    `db:"device_name" json:"deviceName"`
 	Id         uuid.UUID `db:"id" json:"id"`
+	DeviceName string    `db:"device_name" json:"deviceName"`
 	SessionId  int       `db:"session_id" json:"sessionId"`
 	Part       int       `db:"part" json:"part"`
 	ModelId    uuid.UUID `db:"model_id" json:"modelId"`

@@ -11,9 +11,16 @@ func UploadMlNotification(mlNotification *MlNotification) error {
 		return err
 	}
 
-	query := "INSERT INTO " + database.MlNotificationTable + " VALUES ($1, $2, $3,)"
-	// TODO: insert query and variables
-	_, err = conn.Exec(query, mlNotification.Id)
+	query := "INSERT INTO " + database.MlNotificationTable + " VALUES ($1, $2, $3, $4, $5, $6)"
+
+	_, err = conn.Exec(query,
+		mlNotification.Id,
+		mlNotification.DeviceName,
+		mlNotification.SessionId,
+		mlNotification.Part,
+		mlNotification.ModelId,
+		mlNotification.UserId,
+	)
 
 	return err
 }
