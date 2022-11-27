@@ -11,7 +11,7 @@ import (
 	"github.com/hamdaankhalid/mlengine/middlewares"
 )
 
-func GetMlNotification(w http.ResponseWriter, r *http.Request, user middlewares.User) {
+func (router *Router) GetMlNotification(w http.ResponseWriter, r *http.Request, user middlewares.User) {
 	vars := mux.Vars(r)
 	userId := user.Id
 	mlNotificationId, err := uuid.Parse(vars["mlNotificationId"])

@@ -6,7 +6,9 @@ import (
 	"sync"
 
 	"github.com/hamdaankhalid/mlengine/database"
-	"github.com/hamdaankhalid/mlengine/workers"
+	"github.com/hamdaankhalid/mlengine/handlers"
+	"github.com/hamdaankhalid/mlengine/kafkaworkers"
+	"github.com/hamdaankhalid/mlengine/processingqueue"
 
 	"github.com/joho/godotenv"
 )
@@ -18,8 +20,10 @@ func setup() error {
 	return err
 }
 
-func createAndStartServer(wg *sync.WaitGroup) *http.Server {
-	server := &http.Server{Addr: ":6969", Handler: GetRouter()}
+func createAndStartServer(processingQueue *processingqueue.Queue) *http.Server {
+	var wg *sync.WaitGroup
+	router := handlers.NewRouter(processingQueue)
+	server := &http.Server{Addr: ":6969", Handler: router.Routing}
 	go func() {
 		// let main know we are done cleaning up
 		defer wg.Done()
@@ -36,21 +40,34 @@ func createAndStartServer(wg *sync.WaitGroup) *http.Server {
 }
 
 func start(wg *sync.WaitGroup) (*http.Server, error) {
+
+	processingQueue := processingqueue.NewQueue()
+
+	wg.Add(1)
+	go func(wg *sync.WaitGroup) {
+		defer wg.Done()
+		processingQueue.BeginProcessing()
+		log.Println("Async processing shutdown on main thread")
+	}(wg)
+
 	// Start Event Consumer async
-	listener, err := workers.NewListener()
+	eventListener, err := kafkaworkers.NewListener(processingQueue)
 	if err != nil {
 		return nil, err
 	}
-	go func() {
-		err := listener.SubscribeAndConsume()
+
+	wg.Add(1)
+	go func(wg *sync.WaitGroup) {
+		defer wg.Done()
+		err := eventListener.SubscribeAndConsume()
 		if err != nil {
 			log.Fatalf("Event Consumption Exited With Error: %s", err)
 		}
-	}()
+		log.Println("Kafka event processing shutdown on main thread")
+	}(wg)
 
 	//Start Http server async
-	server := createAndStartServer(wg)
-
+	server := createAndStartServer(processingQueue)
 	return server, nil
 }
 
@@ -63,7 +80,7 @@ func main() {
 
 	// Use waitgroups for graceful exit on http server
 	var wg sync.WaitGroup
-	wg.Add(1)
+
 	_, err = start(&wg)
 	wg.Wait()
 

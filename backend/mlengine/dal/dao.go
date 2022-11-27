@@ -11,6 +11,12 @@ type Model struct {
 	UserId    int       `db:"user_id" json:"userId"`
 }
 
+type ModelWithoutData struct {
+	Filename string    `db:"filename" json:"filename"`
+	Id       uuid.UUID `db:"id" json:"id"`
+	UserId   int       `db:"user_id" json:"userId"`
+}
+
 type MlNotification struct {
 	DeviceName string    `db:"device_name" json:"deviceName"`
 	Id         uuid.UUID `db:"id" json:"id"`

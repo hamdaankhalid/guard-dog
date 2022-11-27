@@ -11,7 +11,7 @@ import (
 	"github.com/hamdaankhalid/mlengine/middlewares"
 )
 
-func GetModel(w http.ResponseWriter, r *http.Request, user middlewares.User) {
+func (router *Router) GetModel(w http.ResponseWriter, r *http.Request, user middlewares.User) {
 	vars := mux.Vars(r)
 	userId := user.Id
 	modelId, err := uuid.Parse(vars["modelId"])

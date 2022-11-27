@@ -4,12 +4,11 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/google/uuid"
-	"github.com/hamdaankhalid/mlengine/dal"
 	"github.com/hamdaankhalid/mlengine/middlewares"
+	"github.com/hamdaankhalid/mlengine/processingqueue"
 )
 
-func UploadModel(w http.ResponseWriter, r *http.Request, user middlewares.User) {
+func (router *Router) UploadModel(w http.ResponseWriter, r *http.Request, user middlewares.User) {
 	// upload of 10 MB files.
 	r.ParseMultipartForm(10 << 20)
 	file, handler, err := r.FormFile("model")
@@ -22,28 +21,8 @@ func UploadModel(w http.ResponseWriter, r *http.Request, user middlewares.User) 
 	defer file.Close()
 	log.Printf("File Size: %+v\n", handler.Size)
 	log.Printf("MIME Header: %+v\n", handler.Header)
-	// get user details from the JWT token
-	id, err := uuid.NewUUID()
-	if err != nil {
-		log.Println(err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	bytes := []byte{}
 
-	_, err = file.Read(bytes)
-	if err != nil {
-		log.Println("Read Error", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
+	router.processingQueue.Enqueue(processingqueue.UploadModelTaskName, &processingqueue.UploadModelReq{File: &file, Handler: handler, UserId: user.Id})
 
-	model := dal.Model{ModelFile: bytes, Id: id, Filename: handler.Filename, UserId: user.Id}
-	err = dal.UploadModel(&model)
-	if err != nil {
-		log.Println(err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
 	w.WriteHeader(http.StatusCreated)
 }

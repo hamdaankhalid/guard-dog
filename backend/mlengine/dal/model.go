@@ -50,20 +50,20 @@ func RetrieveModel(id uuid.UUID) (Model, error) {
 	return model, nil
 }
 
-func RetrieveAllModels(userId int) ([]Model, error) {
+func RetrieveAllModels(userId int) ([]ModelWithoutData, error) {
 	conn, err := database.OpenConnection()
 
 	if err != nil {
-		return []Model{}, err
+		return []ModelWithoutData{}, err
 	}
 
-	query := "SELECT * FROM " + database.ModelTable + " WHERE user_id=$1"
+	query := "SELECT id, filename, user_id FROM " + database.ModelTable + " WHERE user_id=$1"
 
-	var models []Model
+	var models []ModelWithoutData
 	err = conn.Select(&models, query, userId)
 	if err != nil {
 		log.Println("Error in getting models from db")
-		return []Model{}, err
+		return []ModelWithoutData{}, err
 	}
 	return models, nil
 }

@@ -1,4 +1,4 @@
-package workers
+package kafkaworkers
 
 import (
 	"log"
@@ -7,6 +7,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/hamdaankhalid/mlengine/processingqueue"
 	"gopkg.in/confluentinc/confluent-kafka-go.v1/kafka"
 )
 
@@ -16,18 +17,19 @@ import (
 	it's own thread.
 **/
 type Listener struct {
-	consumer *kafka.Consumer
-	topics   []string
+	consumer        *kafka.Consumer
+	topics          []string
+	processingQueue *processingqueue.Queue
 }
 
-func NewListener() (*Listener, error) {
+func NewListener(processingQueue *processingqueue.Queue) (*Listener, error) {
 	topics := []string{"video-upload"}
 
 	consumer, err := initConsumer()
 	if err != nil {
 		return nil, err
 	}
-	return &Listener{consumer: consumer, topics: topics}, nil
+	return &Listener{consumer: consumer, topics: topics, processingQueue: processingQueue}, nil
 }
 
 func initConsumer() (*kafka.Consumer, error) {
@@ -61,17 +63,29 @@ func (l *Listener) SubscribeAndConsume() error {
 		select {
 		case _ = <-sigchan:
 			// Terminate
+			log.Println("exiting kafka event subscriptions")
 			run = false
-			os.Exit(0)
 		default:
 			msg, err := l.consumer.ReadMessage(100 * time.Millisecond)
 			if err != nil {
 				// Errors are informational and automatically handled by the consumer
 				continue
 			}
-			handler := RouteTask(msg.TopicPartition.Topic)
-			go handler(msg)
+			l.handleTaskByTopic(msg.TopicPartition.Topic, msg)
 		}
 	}
+	log.Println("Kafka event subscriptions closed")
 	return nil
+}
+
+// Routing should take a kafka message and enqueue onto processing queue
+func (l *Listener) handleTaskByTopic(topic *string, msg *kafka.Message) {
+	switch *topic {
+	case "video-upload":
+		log.Println("requesting enqueuing of inference on model task")
+		l.processingQueue.Enqueue(processingqueue.InferenceOnModelTaskName, msg)
+		return
+	default:
+		return
+	}
 }

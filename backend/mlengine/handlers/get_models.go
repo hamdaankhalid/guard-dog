@@ -9,7 +9,7 @@ import (
 	"github.com/hamdaankhalid/mlengine/middlewares"
 )
 
-func GetModels(w http.ResponseWriter, r *http.Request, user middlewares.User) {
+func (router *Router) GetModels(w http.ResponseWriter, r *http.Request, user middlewares.User) {
 	userId := user.Id
 
 	models, err := dal.RetrieveAllModels(userId)

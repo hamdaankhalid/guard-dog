@@ -9,7 +9,7 @@ import (
 	"github.com/hamdaankhalid/mlengine/middlewares"
 )
 
-func GetMlNotifications(w http.ResponseWriter, r *http.Request, user middlewares.User) {
+func (router *Router) GetMlNotifications(w http.ResponseWriter, r *http.Request, user middlewares.User) {
 	userId := user.Id
 
 	mlNotifications, err := dal.RetrieveAllMlNotifications(userId)
