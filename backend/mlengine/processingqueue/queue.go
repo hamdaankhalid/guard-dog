@@ -8,6 +8,8 @@ import (
 	"sync"
 	"syscall"
 
+	"github.com/hamdaankhalid/mlengine/dal"
+	"github.com/hamdaankhalid/mlengine/database"
 	"gopkg.in/confluentinc/confluent-kafka-go.v1/kafka"
 )
 
@@ -118,13 +120,27 @@ func (q *Queue) process(taskName string) {
 				if uploadModelReq == nil {
 					continue
 				}
-				uploadModelTask(uploadModelReq)
+
+				conn, err := database.OpenConnection()
+				if err != nil {
+					log.Println("Task Not Queued Because No DB Connection:", taskName)
+					return
+				}
+				queries := &dal.Queries{Conn: conn}
+
+				uploadModelTask(uploadModelReq, queries)
 			case InferenceOnModelTaskName:
 				inferenceOnModelTask := <-q.inferenceOnModelTasks
 				if inferenceOnModelTask == nil {
 					continue
 				}
-				parallelModelInferenceTask(inferenceOnModelTask)
+				conn, err := database.OpenConnection()
+				if err != nil {
+					log.Println("Task Not Queued Because No DB Connection:", taskName)
+					return
+				}
+				queries := &dal.Queries{Conn: conn}
+				parallelModelInferenceTask(inferenceOnModelTask, queries)
 			default:
 				log.Println("No corresponding task queue for task: ", taskName)
 			}

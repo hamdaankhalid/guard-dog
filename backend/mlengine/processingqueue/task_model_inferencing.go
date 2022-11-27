@@ -14,14 +14,14 @@ import (
 
 const HUMAN_DETECTION_MODEL = "human-detection-model.onnx"
 
-func parallelModelInferenceTask(msg *kafka.Message) {
+func parallelModelInferenceTask(msg *kafka.Message, queries *dal.Queries) {
 	var event VideoUploadEvent
 	err := json.Unmarshal(msg.Value, &event)
 	if err != nil {
 		log.Println(err)
 	}
 	userId := event.UserId
-	models, err := dal.RetrieveAllModels(userId)
+	models, err := queries.RetrieveAllModels(userId)
 	if err != nil {
 		log.Printf("Error getting models for userId: %d", userId)
 		return
@@ -30,22 +30,22 @@ func parallelModelInferenceTask(msg *kafka.Message) {
 	var wg sync.WaitGroup
 	wg.Add(len(models))
 	for _, model := range models {
-		go inferenceOnModel(&model, &event, &wg)
+		go inferenceOnModel(&model, &event, &wg, queries)
 	}
 	wg.Wait()
 }
 
-func inferenceOnModel(model *dal.ModelWithoutData, event *VideoUploadEvent, wg *sync.WaitGroup) {
+func inferenceOnModel(model *dal.ModelWithoutData, event *VideoUploadEvent, wg *sync.WaitGroup, queries *dal.Queries) {
 	switch model.Filename {
 	case HUMAN_DETECTION_MODEL:
-		humanDetection(model, event)
+		humanDetection(model, event, queries)
 	default:
 		log.Printf("Unregistered Model: %s", model.Filename)
 	}
 }
 
-func humanDetection(model *dal.ModelWithoutData, event *VideoUploadEvent) {
-	modelWithData, err := dal.RetrieveModel(model.Id)
+func humanDetection(model *dal.ModelWithoutData, event *VideoUploadEvent, queries *dal.Queries) {
+	modelWithData, err := queries.RetrieveModel(model.Id)
 	if err != nil {
 		log.Printf("Could not pull model data for mode Id: %s", model.Id)
 		return

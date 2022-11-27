@@ -7,7 +7,6 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
-	"github.com/hamdaankhalid/mlengine/dal"
 	"github.com/hamdaankhalid/mlengine/middlewares"
 )
 
@@ -21,7 +20,7 @@ func (router *Router) GetModel(w http.ResponseWriter, r *http.Request, user midd
 		return
 	}
 
-	model, err := dal.RetrieveModel(modelId)
+	model, err := router.Queries.RetrieveModel(modelId)
 	if err != nil {
 		log.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)

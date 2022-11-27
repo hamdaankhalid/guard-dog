@@ -51,7 +51,11 @@ func start(wg *sync.WaitGroup) (*http.Server, error) {
 	}(wg)
 
 	// Start Http server async
-	router := handlers.NewRouter(processingQueue)
+	router, err := handlers.NewRouter(processingQueue)
+	if err != nil {
+		return nil, err
+	}
+
 	server := &http.Server{Addr: ":6969", Handler: router.Routing}
 	wg.Add(1)
 	go func() {

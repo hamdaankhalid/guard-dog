@@ -7,7 +7,6 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
-	"github.com/hamdaankhalid/mlengine/dal"
 	"github.com/hamdaankhalid/mlengine/middlewares"
 )
 
@@ -21,7 +20,7 @@ func (router *Router) GetMlNotification(w http.ResponseWriter, r *http.Request, 
 		return
 	}
 
-	mlNotification, err := dal.RetrieveMlNotification(mlNotificationId)
+	mlNotification, err := router.Queries.RetrieveMlNotification(mlNotificationId)
 	if err != nil {
 		log.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)

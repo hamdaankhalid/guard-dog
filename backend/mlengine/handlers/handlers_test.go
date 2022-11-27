@@ -11,10 +11,10 @@ import (
 	"github.com/hamdaankhalid/mlengine/processingqueue"
 )
 
-func mockedDependencyRouter() *handlers.Router {
+func mockedDependencyRouter() (*handlers.Router, error) {
 	testQueue := &processingqueue.MockQueue{InnerState: []string{}}
-	router := handlers.NewRouter(testQueue)
-	return router
+	router, err := handlers.NewRouter(testQueue)
+	return router, err
 }
 
 func TestDeleteModelInvalidUuid(t *testing.T) {
@@ -25,7 +25,10 @@ func TestDeleteModelInvalidUuid(t *testing.T) {
 	}
 	w := httptest.NewRecorder()
 	user := middlewares.User{Id: 1}
-	router := mockedDependencyRouter()
+	router, err := mockedDependencyRouter()
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	// Invoke
 	router.DeleteModel(w, r, user)
@@ -51,7 +54,10 @@ func TestDeleteModelNotYourModel(t *testing.T) {
 	}
 	w := httptest.NewRecorder()
 	user := middlewares.User{Id: 1}
-	router := mockedDependencyRouter()
+	router, err := mockedDependencyRouter()
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	// Invoke
 	router.DeleteModel(w, r, user)

@@ -5,14 +5,13 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/hamdaankhalid/mlengine/dal"
 	"github.com/hamdaankhalid/mlengine/middlewares"
 )
 
 func (router *Router) GetModels(w http.ResponseWriter, r *http.Request, user middlewares.User) {
 	userId := user.Id
 
-	models, err := dal.RetrieveAllModels(userId)
+	models, err := router.Queries.RetrieveAllModels(userId)
 	if err != nil {
 		log.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)

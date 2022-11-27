@@ -9,7 +9,7 @@ import (
 	"github.com/hamdaankhalid/mlengine/dal"
 )
 
-func uploadModelTask(uploadModelReq *UploadModelReq) {
+func uploadModelTask(uploadModelReq *UploadModelReq, queries *dal.Queries) {
 	uuid, err := uuid.NewUUID()
 	if err != nil {
 		log.Println(err)
@@ -24,7 +24,7 @@ func uploadModelTask(uploadModelReq *UploadModelReq) {
 	}
 
 	model := dal.Model{ModelFile: bytes.Bytes(), Id: uuid, Filename: uploadModelReq.Handler.Filename, UserId: uploadModelReq.UserId}
-	err = dal.UploadModel(&model)
+	err = queries.UploadModel(&model)
 	if err != nil {
 		log.Println("Error uploading model file: ", model.Filename)
 	}

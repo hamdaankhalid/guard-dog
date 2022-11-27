@@ -5,14 +5,13 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/hamdaankhalid/mlengine/dal"
 	"github.com/hamdaankhalid/mlengine/middlewares"
 )
 
 func (router *Router) GetMlNotifications(w http.ResponseWriter, r *http.Request, user middlewares.User) {
 	userId := user.Id
 
-	mlNotifications, err := dal.RetrieveAllMlNotifications(userId)
+	mlNotifications, err := router.Queries.RetrieveAllMlNotifications(userId)
 	if err != nil {
 		log.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
