@@ -136,7 +136,25 @@ func TestDeleteModelNotYourModel(t *testing.T) {
 
 // TODO: GetMlNotification Tests
 
+func TestGetMlNotificationl(t *testing.T) {
+
+}
+
+func TestGetMlNotificationNotYourMlNotification(t *testing.T) {
+
+}
+
+func TestGetMlNotificationNotExists(t *testing.T) {
+
+}
+
 // TODO: GetMlNotifications Tests
+
+func TestGetMlNotifications(t *testing.T) {
+}
+
+func TestGetMlNotificationsWhenNoModelsExist(t *testing.T) {
+}
 
 // TODO: GetModel Tests
 
@@ -153,8 +171,13 @@ func TestGetModelNotExists(t *testing.T) {
 }
 
 // TODO: GetModels Tests
+func TestGetModels(t *testing.T) {
+}
 
-// TODO: Health Tests
+func TestGetModelsWhenNoModelsExist(t *testing.T) {
+}
+
+// Health Handler Tests
 
 func TestHealth(t *testing.T) {
 	router := MockedPassingDependencyRouter()
@@ -172,3 +195,7 @@ func TestHealth(t *testing.T) {
 }
 
 // TODO: UploadModel Tests
+
+func TestUploadModel(t *testing.T) {
+
+}
