@@ -14,6 +14,7 @@ func (router *Router) DeleteModel(w http.ResponseWriter, r *http.Request, user m
 	userId := user.Id
 	modelUuid, ok := vars["modelId"]
 	if !ok {
+		log.Println("Model UUID not present")
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -33,6 +34,7 @@ func (router *Router) DeleteModel(w http.ResponseWriter, r *http.Request, user m
 	}
 
 	if model.UserId != userId {
+		log.Println("User does not own model for deletion")
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
