@@ -6,16 +6,24 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
+	"github.com/hamdaankhalid/mlengine/dal"
 	"github.com/hamdaankhalid/mlengine/handlers"
 	"github.com/hamdaankhalid/mlengine/middlewares"
 	"github.com/hamdaankhalid/mlengine/processingqueue"
 )
 
-func mockedDependencyRouter() (*handlers.Router, error) {
+func MockedPassingDependencyRouter() *handlers.Router {
+	queries := dal.MockQueries{ErrorOnly: false, Error: nil}
 	testQueue := &processingqueue.MockQueue{InnerState: []string{}}
-	// TODO
-	router, err := handlers.NewRouter(testQueue)
-	return router, err
+	router := handlers.NewRouter(testQueue, &queries)
+	return router
+}
+
+func MockedFailingDependencyRouter(err error) *handlers.Router {
+	queries := dal.MockQueries{ErrorOnly: true, Error: err}
+	testQueue := &processingqueue.MockQueue{InnerState: []string{}}
+	router := handlers.NewRouter(testQueue, &queries)
+	return router
 }
 
 func TestDeleteModelInvalidUuid(t *testing.T) {
@@ -26,10 +34,7 @@ func TestDeleteModelInvalidUuid(t *testing.T) {
 	}
 	w := httptest.NewRecorder()
 	user := middlewares.User{Id: 1}
-	router, err := mockedDependencyRouter()
-	if err != nil {
-		t.Fatal(err)
-	}
+	router := MockedPassingDependencyRouter()
 
 	// Invoke
 	router.DeleteModel(w, r, user)
