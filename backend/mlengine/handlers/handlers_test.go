@@ -76,19 +76,19 @@ func MockedFailingDependencyRouter(err error) *handlers.Router {
 	return router
 }
 
-// Delete Model Tests
+// DeleteModel Tests
 
 func TestDeleteModel(t *testing.T) {
 	// Setup
 	router := MockedPassingDependencyRouter()
 	modelUuid := router.Queries.(*dal.MockQueries).Model.Id
 	r, err := http.NewRequest("DELETE", "model"+modelUuid.String(), nil)
-	vars := make(map[string]string)
-	vars["modelId"] = modelUuid.String()
-	r = mux.SetURLVars(r, vars)
 	if err != nil {
 		t.Fatal(err)
 	}
+	vars := make(map[string]string)
+	vars["modelId"] = modelUuid.String()
+	r = mux.SetURLVars(r, vars)
 	w := httptest.NewRecorder()
 	user := middlewares.User{Id: 1}
 
@@ -112,12 +112,12 @@ func TestDeleteModelNotYourModel(t *testing.T) {
 	// Make this models user not the user who will be making the call
 	router.Queries.(*dal.MockQueries).Model.UserId = 2
 	r, err := http.NewRequest("DELETE", "model"+modelUuid.String(), nil)
-	vars := make(map[string]string)
-	vars["modelId"] = modelUuid.String()
-	r = mux.SetURLVars(r, vars)
 	if err != nil {
 		t.Fatal(err)
 	}
+	vars := make(map[string]string)
+	vars["modelId"] = modelUuid.String()
+	r = mux.SetURLVars(r, vars)
 	w := httptest.NewRecorder()
 	user := middlewares.User{Id: 1}
 
@@ -134,24 +134,41 @@ func TestDeleteModelNotYourModel(t *testing.T) {
 	}
 }
 
-func TestDeleteModelInvalidUuid(t *testing.T) {
-	// Setup
-	r, err := http.NewRequest("DELETE", "model", nil)
-	vars := make(map[string]string)
-	vars["modelId"] = "notuuid"
-	r = mux.SetURLVars(r, vars)
+// TODO: GetMlNotification Tests
+
+// TODO: GetMlNotifications Tests
+
+// TODO: GetModel Tests
+
+func TestGetModel(t *testing.T) {
+
+}
+
+func TestGetModelNotYourModel(t *testing.T) {
+
+}
+
+func TestGetModelNotExists(t *testing.T) {
+
+}
+
+// TODO: GetModels Tests
+
+// TODO: Health Tests
+
+func TestHealth(t *testing.T) {
+	router := MockedPassingDependencyRouter()
+	r, err := http.NewRequest("GET", "health", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
 	w := httptest.NewRecorder()
-	user := middlewares.User{Id: 1}
-	router := MockedPassingDependencyRouter()
 
-	// Invoke
-	router.DeleteModel(w, r, user)
+	router.Health(w, r)
 
-	// Assert
-	if w.Result().StatusCode != http.StatusInternalServerError {
+	if w.Result().StatusCode != http.StatusOK {
 		t.Fail()
 	}
 }
+
+// TODO: UploadModel Tests
