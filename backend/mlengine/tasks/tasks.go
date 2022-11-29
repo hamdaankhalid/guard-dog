@@ -31,7 +31,7 @@ type VideoUploadEvent struct {
 const InferenceOnModelTaskName = "inferenceOnModelTask"
 
 type UploadModelReq struct {
-	File    *multipart.File
+	File    multipart.File
 	Handler *multipart.FileHeader
 	UserId  int
 }
@@ -85,21 +85,23 @@ func humanDetection(model *dal.ModelWithoutData, event *VideoUploadEvent, querie
 		return
 	}
 	defer videoData.Body.Close()
+	// TODO: Video data not retrieved correctly
 	log.Println("videodata", videoData)
 }
 
-func UploadModelTask(uploadModelReq *UploadModelReq, queries dal.IQueries) {
+func UploadModelTask(uploadModelReq *UploadModelReq, queries dal.IQueries) error {
+
 	uuid, err := uuid.NewUUID()
 	if err != nil {
 		log.Println(err)
-		return
+		return err
 	}
 
 	bytes := bytes.NewBuffer(nil)
-	n, err := io.Copy(bytes, *uploadModelReq.File)
+	n, err := io.Copy(bytes, uploadModelReq.File)
 	if err != nil || n == 0 {
 		log.Println("Read Error", err)
-		return
+		return err
 	}
 
 	model := dal.Model{ModelFile: bytes.Bytes(), Id: uuid, Filename: uploadModelReq.Handler.Filename, UserId: uploadModelReq.UserId}
@@ -107,4 +109,5 @@ func UploadModelTask(uploadModelReq *UploadModelReq, queries dal.IQueries) {
 	if err != nil {
 		log.Println("Error uploading model file: ", model.Filename)
 	}
+	return nil
 }

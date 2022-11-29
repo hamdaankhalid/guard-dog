@@ -1,4 +1,4 @@
-package handlers_test
+package handlers
 
 import (
 	"bytes"
@@ -14,12 +14,11 @@ import (
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	"github.com/hamdaankhalid/mlengine/dal"
-	"github.com/hamdaankhalid/mlengine/handlers"
 	"github.com/hamdaankhalid/mlengine/middlewares"
 	"github.com/hamdaankhalid/mlengine/processingqueue"
 )
 
-func MockedPassingDependencyRouter() *handlers.Router {
+func MockedPassingDependencyRouter() *Router {
 	id1 := uuid.New()
 	id2 := uuid.New()
 
@@ -71,14 +70,14 @@ func MockedPassingDependencyRouter() *handlers.Router {
 		ModelsWithData:  []dal.Model{modelWithData},
 	}
 	testQueue := &processingqueue.MockQueue{InnerState: []string{}}
-	router := handlers.NewRouter(testQueue, &queries)
+	router := NewRouter(testQueue, &queries)
 	return router
 }
 
-func MockedFailingDependencyRouter(err error) *handlers.Router {
+func MockedFailingDependencyRouter(err error) *Router {
 	queries := dal.MockQueries{ErrorOnly: true, Error: err}
 	testQueue := &processingqueue.MockQueue{InnerState: []string{}}
-	router := handlers.NewRouter(testQueue, &queries)
+	router := NewRouter(testQueue, &queries)
 	return router
 }
 
