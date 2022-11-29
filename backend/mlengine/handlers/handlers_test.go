@@ -1,6 +1,7 @@
 package handlers_test
 
 import (
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -62,7 +63,7 @@ func MockedPassingDependencyRouter() *handlers.Router {
 		Error:           nil,
 		MlNotifications: []dal.MlNotification{notification1, notification2},
 		Models:          []dal.ModelWithoutData{model1, model2},
-		Model:           modelWithData,
+		ModelsWithData:  []dal.Model{modelWithData},
 	}
 	testQueue := &processingqueue.MockQueue{InnerState: []string{}}
 	router := handlers.NewRouter(testQueue, &queries)
@@ -81,8 +82,8 @@ func MockedFailingDependencyRouter(err error) *handlers.Router {
 func TestDeleteModel(t *testing.T) {
 	// Setup
 	router := MockedPassingDependencyRouter()
-	modelUuid := router.Queries.(*dal.MockQueries).Model.Id
-	r, err := http.NewRequest("DELETE", "model"+modelUuid.String(), nil)
+	modelUuid := router.Queries.(*dal.MockQueries).Models[0].Id
+	r, err := http.NewRequest("DELETE", "model/"+modelUuid.String(), nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -108,10 +109,10 @@ func TestDeleteModel(t *testing.T) {
 func TestDeleteModelNotYourModel(t *testing.T) {
 	// Setup
 	router := MockedPassingDependencyRouter()
-	modelUuid := router.Queries.(*dal.MockQueries).Model.Id
+	model := router.Queries.(*dal.MockQueries).Models[0]
 	// Make this models user not the user who will be making the call
-	router.Queries.(*dal.MockQueries).Model.UserId = 2
-	r, err := http.NewRequest("DELETE", "model"+modelUuid.String(), nil)
+	modelUuid := model.Id
+	r, err := http.NewRequest("DELETE", "model/"+modelUuid.String(), nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -119,8 +120,7 @@ func TestDeleteModelNotYourModel(t *testing.T) {
 	vars["modelId"] = modelUuid.String()
 	r = mux.SetURLVars(r, vars)
 	w := httptest.NewRecorder()
-	user := middlewares.User{Id: 1}
-
+	user := middlewares.User{Id: model.UserId + 5} // User does not own the model
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -136,16 +136,99 @@ func TestDeleteModelNotYourModel(t *testing.T) {
 
 // TODO: GetMlNotification Tests
 
-func TestGetMlNotificationl(t *testing.T) {
+func TestGetMlNotification(t *testing.T) {
+	// Setup
+	router := MockedPassingDependencyRouter()
+	expect := router.Queries.(*dal.MockQueries).MlNotifications[0]
+	mlNotificationId := expect.Id
 
+	r, err := http.NewRequest("GET", "ml-notification"+mlNotificationId.String(), nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	vars := make(map[string]string)
+	vars["mlNotificationId"] = mlNotificationId.String()
+	r = mux.SetURLVars(r, vars)
+	w := httptest.NewRecorder()
+	user := middlewares.User{Id: 1}
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Invoke
+	router.GetMlNotification(w, r, user)
+
+	// Assert
+	if w.Result().StatusCode != http.StatusOK {
+		t.Fail()
+	}
+	dec := json.NewDecoder(w.Result().Body)
+	var res dal.MlNotification
+	err = dec.Decode(&res)
+	if err != nil {
+		t.Fail()
+	}
+	if res != expect {
+		t.Fail()
+	}
 }
 
 func TestGetMlNotificationNotYourMlNotification(t *testing.T) {
+	// Setup
+	router := MockedPassingDependencyRouter()
+	expect := router.Queries.(*dal.MockQueries).MlNotifications[0]
+	mlNotificationId := expect.Id
 
+	r, err := http.NewRequest("GET", "ml-notification"+mlNotificationId.String(), nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	vars := make(map[string]string)
+	vars["mlNotificationId"] = mlNotificationId.String()
+	r = mux.SetURLVars(r, vars)
+	w := httptest.NewRecorder()
+	user := middlewares.User{Id: 99}
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Invoke
+	router.GetMlNotification(w, r, user)
+
+	// Assert
+	if w.Result().StatusCode != http.StatusUnauthorized {
+		t.Fail()
+	}
 }
 
 func TestGetMlNotificationNotExists(t *testing.T) {
+	// Setup
+	router := MockedPassingDependencyRouter()
+	mlNotificationId := uuid.New()
 
+	r, err := http.NewRequest("GET", "ml-notification"+mlNotificationId.String(), nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	vars := make(map[string]string)
+	vars["mlNotificationId"] = mlNotificationId.String()
+	r = mux.SetURLVars(r, vars)
+	w := httptest.NewRecorder()
+	user := middlewares.User{Id: 99}
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Invoke
+	router.GetMlNotification(w, r, user)
+
+	// Assert
+	if w.Result().StatusCode != http.StatusInternalServerError {
+		t.Fail()
+	}
 }
 
 // TODO: GetMlNotifications Tests
@@ -195,7 +278,6 @@ func TestHealth(t *testing.T) {
 }
 
 // TODO: UploadModel Tests
-
 func TestUploadModel(t *testing.T) {
 
 }

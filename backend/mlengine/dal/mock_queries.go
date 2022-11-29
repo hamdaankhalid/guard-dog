@@ -7,17 +7,19 @@ import (
 )
 
 type MockQueries struct {
+	// All attributes are exported so we can use them for testing
 	ErrorOnly       bool
 	Error           error
 	MlNotifications []MlNotification
 	Models          []ModelWithoutData
-	Model           Model
+	ModelsWithData  []Model
 }
 
 func (q *MockQueries) UploadMlNotification(mlNotification *MlNotification) error {
 	if q.ErrorOnly {
 		return q.Error
 	}
+	q.MlNotifications = append(q.MlNotifications, *mlNotification)
 	return nil
 }
 
@@ -46,6 +48,9 @@ func (q *MockQueries) UploadModel(model *Model) error {
 	if q.ErrorOnly {
 		return q.Error
 	}
+
+	q.ModelsWithData = append(q.ModelsWithData, *model)
+
 	return nil
 }
 
@@ -53,7 +58,19 @@ func (q *MockQueries) RetrieveModel(id uuid.UUID) (Model, error) {
 	if q.ErrorOnly {
 		return Model{}, q.Error
 	}
-	return q.Model, nil
+
+	for _, v := range q.ModelsWithData {
+		if v.Id == id {
+			return v, nil
+		}
+	}
+
+	for _, v := range q.Models {
+		if v.Id == id {
+			return Model{ModelFile: []byte{}, Id: v.Id, Filename: v.Filename, UserId: v.UserId}, nil
+		}
+	}
+	return Model{}, errors.New("No Model Found")
 }
 
 func (q *MockQueries) RetrieveAllModels(userId int) ([]ModelWithoutData, error) {
@@ -68,5 +85,18 @@ func (q *MockQueries) DeleteModel(modelId uuid.UUID) error {
 	if q.ErrorOnly {
 		return q.Error
 	}
+
+	for index, v := range q.ModelsWithData {
+		if v.Id == modelId {
+			q.ModelsWithData = append(q.ModelsWithData[:index], q.ModelsWithData[index+1:]...)
+		}
+	}
+
+	for index, v := range q.Models {
+		if v.Id == modelId {
+			q.ModelsWithData = append(q.ModelsWithData[:index], q.ModelsWithData[index+1:]...)
+		}
+	}
+
 	return nil
 }
