@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"reflect"
 	"testing"
 
 	"github.com/google/uuid"
@@ -134,7 +135,7 @@ func TestDeleteModelNotYourModel(t *testing.T) {
 	}
 }
 
-// TODO: GetMlNotification Tests
+// GetMlNotification Tests
 
 func TestGetMlNotification(t *testing.T) {
 	// Setup
@@ -231,33 +232,59 @@ func TestGetMlNotificationNotExists(t *testing.T) {
 	}
 }
 
-// TODO: GetMlNotifications Tests
+// GetMlNotifications Tests
 
 func TestGetMlNotifications(t *testing.T) {
-}
+	// Setup
+	router := MockedPassingDependencyRouter()
+	userId := router.Queries.(*dal.MockQueries).MlNotifications[0].UserId
+	expected := router.Queries.(*dal.MockQueries).MlNotifications
+	r, err := http.NewRequest("GET", "ml-notification", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	w := httptest.NewRecorder()
+	user := middlewares.User{Id: userId}
 
-func TestGetMlNotificationsWhenNoModelsExist(t *testing.T) {
+	// Invoke
+	router.GetMlNotifications(w, r, user)
+
+	// Assert
+	if w.Result().StatusCode != http.StatusOK {
+		t.Fail()
+	}
+	dec := json.NewDecoder(w.Result().Body)
+	var res []dal.MlNotification
+	err = dec.Decode(&res)
+	if err != nil {
+		t.Fail()
+	}
+	if !reflect.DeepEqual(res, expected) {
+		t.Fail()
+	}
 }
 
 // TODO: GetModel Tests
 
 func TestGetModel(t *testing.T) {
-
+	t.Skip()
 }
 
 func TestGetModelNotYourModel(t *testing.T) {
-
+	t.Skip()
 }
 
 func TestGetModelNotExists(t *testing.T) {
-
+	t.Skip()
 }
 
 // TODO: GetModels Tests
 func TestGetModels(t *testing.T) {
+	t.Skip()
 }
 
 func TestGetModelsWhenNoModelsExist(t *testing.T) {
+	t.Skip()
 }
 
 // Health Handler Tests
@@ -279,5 +306,5 @@ func TestHealth(t *testing.T) {
 
 // TODO: UploadModel Tests
 func TestUploadModel(t *testing.T) {
-
+	t.Skip()
 }
