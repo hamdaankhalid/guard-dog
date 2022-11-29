@@ -1,11 +1,15 @@
-package processingqueue
+package tasks
 
 import (
+	"bytes"
 	"encoding/json"
+	"io"
 	"log"
+	"mime/multipart"
 	"net/http"
 	"sync"
 
+	"github.com/google/uuid"
 	"github.com/hamdaankhalid/mlengine/dal"
 	"github.com/owulveryck/onnx-go"
 	"github.com/owulveryck/onnx-go/backend/simple"
@@ -14,7 +18,25 @@ import (
 
 const HUMAN_DETECTION_MODEL = "human-detection-model.onnx"
 
-func parallelModelInferenceTask(msg *kafka.Message, queries *dal.Queries) {
+const UploadModelTaskName = "uploadModelTask"
+
+type VideoUploadEvent struct {
+	Url        string `json:"url"`
+	UserId     int    `json:"user_id"`
+	DeviceName string `json:"deviceName"`
+	SessionId  int    `json:"sessionId"`
+	Part       int    `json:"part"`
+}
+
+const InferenceOnModelTaskName = "inferenceOnModelTask"
+
+type UploadModelReq struct {
+	File    *multipart.File
+	Handler *multipart.FileHeader
+	UserId  int
+}
+
+func ParallelModelInferenceTask(msg *kafka.Message, queries dal.IQueries) {
 	var event VideoUploadEvent
 	err := json.Unmarshal(msg.Value, &event)
 	if err != nil {
@@ -35,7 +57,7 @@ func parallelModelInferenceTask(msg *kafka.Message, queries *dal.Queries) {
 	wg.Wait()
 }
 
-func inferenceOnModel(model *dal.ModelWithoutData, event *VideoUploadEvent, wg *sync.WaitGroup, queries *dal.Queries) {
+func inferenceOnModel(model *dal.ModelWithoutData, event *VideoUploadEvent, wg *sync.WaitGroup, queries dal.IQueries) {
 	switch model.Filename {
 	case HUMAN_DETECTION_MODEL:
 		humanDetection(model, event, queries)
@@ -44,7 +66,7 @@ func inferenceOnModel(model *dal.ModelWithoutData, event *VideoUploadEvent, wg *
 	}
 }
 
-func humanDetection(model *dal.ModelWithoutData, event *VideoUploadEvent, queries *dal.Queries) {
+func humanDetection(model *dal.ModelWithoutData, event *VideoUploadEvent, queries dal.IQueries) {
 	modelWithData, err := queries.RetrieveModel(model.Id)
 	if err != nil {
 		log.Printf("Could not pull model data for mode Id: %s", model.Id)
@@ -64,4 +86,25 @@ func humanDetection(model *dal.ModelWithoutData, event *VideoUploadEvent, querie
 	}
 	defer videoData.Body.Close()
 	log.Println("videodata", videoData)
+}
+
+func UploadModelTask(uploadModelReq *UploadModelReq, queries dal.IQueries) {
+	uuid, err := uuid.NewUUID()
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	bytes := bytes.NewBuffer(nil)
+	n, err := io.Copy(bytes, *uploadModelReq.File)
+	if err != nil || n == 0 {
+		log.Println("Read Error", err)
+		return
+	}
+
+	model := dal.Model{ModelFile: bytes.Bytes(), Id: uuid, Filename: uploadModelReq.Handler.Filename, UserId: uploadModelReq.UserId}
+	err = queries.UploadModel(&model)
+	if err != nil {
+		log.Println("Error uploading model file: ", model.Filename)
+	}
 }

@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/hamdaankhalid/mlengine/processingqueue"
+	"github.com/hamdaankhalid/mlengine/tasks"
 	"gopkg.in/confluentinc/confluent-kafka-go.v1/kafka"
 )
 
@@ -81,7 +82,7 @@ func (l *Listener) handleTaskByTopic(topic *string, msg *kafka.Message) {
 	switch *topic {
 	case "video-upload":
 		log.Println("requesting enqueuing of inference on model task")
-		l.processingQueue.Enqueue(processingqueue.InferenceOnModelTaskName, msg)
+		l.processingQueue.Enqueue(tasks.InferenceOnModelTaskName, msg)
 		return
 	default:
 		return

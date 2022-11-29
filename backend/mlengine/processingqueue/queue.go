@@ -2,7 +2,6 @@ package processingqueue
 
 import (
 	"log"
-	"mime/multipart"
 	"os"
 	"os/signal"
 	"sync"
@@ -10,26 +9,9 @@ import (
 
 	"github.com/hamdaankhalid/mlengine/dal"
 	"github.com/hamdaankhalid/mlengine/database"
+	"github.com/hamdaankhalid/mlengine/tasks"
 	"gopkg.in/confluentinc/confluent-kafka-go.v1/kafka"
 )
-
-const UploadModelTaskName = "uploadModelTask"
-
-type VideoUploadEvent struct {
-	Url        string `json:"url"`
-	UserId     int    `json:"user_id"`
-	DeviceName string `json:"deviceName"`
-	SessionId  int    `json:"sessionId"`
-	Part       int    `json:"part"`
-}
-
-const InferenceOnModelTaskName = "inferenceOnModelTask"
-
-type UploadModelReq struct {
-	File    *multipart.File
-	Handler *multipart.FileHeader
-	UserId  int
-}
 
 type IQueue interface {
 	BeginProcessing()
@@ -37,13 +19,13 @@ type IQueue interface {
 }
 
 type Queue struct {
-	uploadModelTasks      chan *UploadModelReq
+	uploadModelTasks      chan *tasks.UploadModelReq
 	inferenceOnModelTasks chan *kafka.Message
 }
 
 func NewQueue() *Queue {
 	return &Queue{
-		uploadModelTasks:      make(chan *UploadModelReq),
+		uploadModelTasks:      make(chan *tasks.UploadModelReq),
 		inferenceOnModelTasks: make(chan *kafka.Message)}
 }
 
@@ -54,13 +36,13 @@ func (q *Queue) BeginProcessing() {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		q.process(UploadModelTaskName)
+		q.process(tasks.UploadModelTaskName)
 	}()
 
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		q.process(InferenceOnModelTaskName)
+		q.process(tasks.InferenceOnModelTaskName)
 	}()
 
 	sigchan := make(chan os.Signal, 1)
@@ -87,10 +69,10 @@ func (q *Queue) BeginProcessing() {
 // Task should be a pointer passed val
 func (q *Queue) Enqueue(taskName string, task interface{}) {
 	switch taskName {
-	case UploadModelTaskName:
-		q.uploadModelTasks <- task.(*UploadModelReq)
+	case tasks.UploadModelTaskName:
+		q.uploadModelTasks <- task.(*tasks.UploadModelReq)
 		break
-	case InferenceOnModelTaskName:
+	case tasks.InferenceOnModelTaskName:
 		q.inferenceOnModelTasks <- task.(*kafka.Message)
 		break
 	default:
@@ -120,20 +102,20 @@ func (q *Queue) process(taskName string) {
 			run = false
 		default:
 			switch taskName {
-			case UploadModelTaskName:
+			case tasks.UploadModelTaskName:
 				uploadModelReq := <-q.uploadModelTasks
 				if uploadModelReq == nil {
 					continue
 				}
 				queries := &dal.Queries{Conn: conn}
-				uploadModelTask(uploadModelReq, queries)
-			case InferenceOnModelTaskName:
+				tasks.UploadModelTask(uploadModelReq, queries)
+			case tasks.InferenceOnModelTaskName:
 				inferenceOnModelTask := <-q.inferenceOnModelTasks
 				if inferenceOnModelTask == nil {
 					continue
 				}
 				queries := &dal.Queries{Conn: conn}
-				parallelModelInferenceTask(inferenceOnModelTask, queries)
+				tasks.ParallelModelInferenceTask(inferenceOnModelTask, queries)
 			default:
 				log.Println("No corresponding task queue for task: ", taskName)
 			}
